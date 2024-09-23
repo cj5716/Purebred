@@ -16,8 +16,27 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "uci.h"
+#include <array>
 
-int main(int argc, const char *argv[]) {
-    uci_loop(argc, argv);
-}
+// Thanks to Stormphrax for this code for multiple-dimensional arrays without ugly nesting
+template <typename T, usize N, usize... Ns>
+struct ArrayImpl
+{
+    using Type = std::array<typename ArrayImpl<T, Ns...>::Type, N>;
+};
+
+template <typename T, usize N>
+struct ArrayImpl<T, N>
+{
+    using Type = std::array<T, N>;
+};
+
+template <typename T, usize... Ns>
+using Array = typename ArrayImpl<T, Ns...>::Type;
+
+template<typename T, std::size_t Size>
+class ArrayVec {
+
+public:
+    
+};

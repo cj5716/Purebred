@@ -16,8 +16,20 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "uci.h"
 
-int main(int argc, const char *argv[]) {
-    uci_loop(argc, argv);
+#include <iostream>
+#include "types.h"
+
+void uci_loop(int argc, const char *argv[]) {
+    std::cout << Name << " by " << Author << "\n";
+    while (true) {
+        std::string line;
+
+        // Read a line of input
+        // If no input -> quit
+        if (!std::getline(std::cin, line)) break;
+
+        // If the line is empty we move on to the next one
+        if (line.empty()) continue;
+    }
 }
