@@ -16,27 +16,52 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
 #include <array>
+#include <cstdint>
 
 // Thanks to Stormphrax for this code for multiple-dimensional arrays without ugly nesting
-template <typename T, usize N, usize... Ns>
+template <typename T, size_t N, size_t... Ns>
 struct ArrayImpl
 {
     using Type = std::array<typename ArrayImpl<T, Ns...>::Type, N>;
 };
 
-template <typename T, usize N>
+template <typename T, size_t N>
 struct ArrayImpl<T, N>
 {
     using Type = std::array<T, N>;
 };
 
-template <typename T, usize... Ns>
+template <typename T, size_t... Ns>
 using Array = typename ArrayImpl<T, Ns...>::Type;
 
-template<typename T, std::size_t Size>
+template<typename T, size_t Size>
 class ArrayVec {
 
 public:
-    
+    size_t size() const { return currSize; }
+
+    void push_back(const T &value) {
+        values.at(currSize) = value;
+        currSize++;
+        assert(currSize < Size);
+    }
+
+    void push_back() {
+        currSize++;
+        assert(currSize < Size);
+    }
+
+    void pop_back() {
+        assert(currSize > 0);
+        currSize--;
+    }
+
+    T &back() { return values.at(currSize - 1); }
+    T &at(int index) { return values.at(index); }
+
+private:
+    Array<T, Size> values;
+    size_t currSize;
 };

@@ -16,13 +16,12 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
 #include <cassert>
 #include <cstdint>
 
 constexpr std::string Name   = "Purebred v0.01";
 constexpr std::string Author = "cj5716";
-
-using Bitboard = uint64_t;
 
 enum class Square : int
 {
@@ -34,20 +33,20 @@ enum class Square : int
     A6, B6, C6, D6, E6, F6, G6, H6,
     A7, B7, C7, D7, E7, F7, G7, H7,
     A8, B8, C8, D8, E8, F8, G8, H8,
-    None = 64, Types = 64
+    None = 64, NumTypes = 64
 };
 
 
 enum class Colour : int
 {
     White, Black,
-    None = 2, Types = 2
+    None = 2, NumTypes = 2
 };
 
 enum class PieceType : int
 {
     Pawn, Knight, Bishop, Rook, Queen, King,
-    None = 6, Types = 6
+    None = 6, NumTypes = 6
 };
 
 enum class Piece : int
@@ -58,7 +57,7 @@ enum class Piece : int
     WhiteRook  , BlackRook  ,
     WhiteQueen , BlackQueen ,
     WhiteKing  , BlackKing  ,
-    None = 12, Types = 12
+    None = 12  , NumTypes = 12
 };
 
 [[nodiscard]] constexpr Colour orient(Colour a, Colour b)
@@ -71,6 +70,25 @@ enum class Piece : int
 [[nodiscard]] constexpr Colour flip(Colour colour)
 {
     return orient(colour, Colour::Black);
+}
+
+[[nodiscard]] constexpr Square make_square(int rank, int file)
+{
+    assert(rank < 8);
+    assert(file < 8);
+    return static_cast<Square>((rank << 3) | file);
+}
+
+[[nodiscard]] constexpr int rank_of(Square square)
+{
+    assert(square != Square::None);
+    return static_cast<int>(square) >> 3;
+}
+
+[[nodiscard]] constexpr int file_of(Square square)
+{
+    assert(square != Square::None);
+    return static_cast<int>(square) & 0b111;
 }
 
 [[nodiscard]] constexpr Square orient(Square sq, Colour c)
