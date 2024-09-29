@@ -19,9 +19,13 @@
 #pragma once
 #include <cassert>
 #include <cstdint>
+#include <string>
 
-constexpr std::string Name   = "Purebred v0.01";
-constexpr std::string Author = "cj5716";
+constexpr std::string_view Name   = "Purebred v0.01";
+constexpr std::string_view Author = "cj5716";
+
+constexpr std::string_view StartPos = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+constexpr int              MaxPly   = 256;
 
 enum class Square : int
 {
@@ -60,6 +64,67 @@ enum class Piece : int
     None = 12  , NumTypes = 12
 };
 
+enum class Direction : int
+{
+    Up    = 8,
+    Down  = -Up,
+    Right = 1,
+    Left  = -Right,
+
+    UpLeft    = Up + Left,
+    UpRight   = Up + Right,
+    DownLeft  = Down + Left,
+    DownRight = Down + Right
+};
+
+enum class CastlingRights : uint8_t
+{
+    None  = 0b00,
+    King  = 0b01,
+    Queen = 0b10,
+    All   = King | Queen
+};
+
+[[nodiscard]] constexpr Square operator+(Square a, Square b) { return static_cast<Square>(static_cast<int>(a) + static_cast<int>(b)); }
+[[nodiscard]] constexpr Square operator-(Square a, Square b) { return static_cast<Square>(static_cast<int>(a) - static_cast<int>(b)); }
+[[nodiscard]] constexpr Square operator^(Square a, Square b) { return static_cast<Square>(static_cast<int>(a) ^ static_cast<int>(b)); }
+[[nodiscard]] constexpr Square operator|(Square a, Square b) { return static_cast<Square>(static_cast<int>(a) | static_cast<int>(b)); }
+[[nodiscard]] constexpr Square operator&(Square a, Square b) { return static_cast<Square>(static_cast<int>(a) & static_cast<int>(b)); }
+
+[[nodiscard]] constexpr Square operator+(Square a, int b)    { return a + static_cast<Square>(b); }
+[[nodiscard]] constexpr Square operator-(Square a, int b)    { return a - static_cast<Square>(b); }
+[[nodiscard]] constexpr Square operator^(Square a, int b)    { return a ^ static_cast<Square>(b); }
+[[nodiscard]] constexpr Square operator|(Square a, int b)    { return a | static_cast<Square>(b); }
+[[nodiscard]] constexpr Square operator&(Square a, int b)    { return a & static_cast<Square>(b); }
+
+[[nodiscard]] constexpr Square operator<<(Square a, int b)   { return static_cast<Square>(static_cast<int>(a) << b); }
+[[nodiscard]] constexpr Square operator>>(Square a, int b)   { return static_cast<Square>(static_cast<int>(a) >> b); }
+
+[[nodiscard]] constexpr Square operator+(Square sq, Direction dir) { return sq + static_cast<int>(dir); }
+[[nodiscard]] constexpr Square operator-(Square sq, Direction dir) { return sq - static_cast<int>(dir); }
+
+[[nodiscard]] constexpr Direction operator+(Direction a, Direction b) { return static_cast<Direction>(static_cast<int>(a) + static_cast<int>(b)); }
+[[nodiscard]] constexpr Direction operator-(Direction a, Direction b) { return static_cast<Direction>(static_cast<int>(a) - static_cast<int>(b)); }
+
+constexpr Piece &operator++(Piece &pc) { return pc = static_cast<Piece>(static_cast<int>(pc) + 1); }
+constexpr Piece &operator--(Piece &pc) { return pc = static_cast<Piece>(static_cast<int>(pc) - 1); }
+
+constexpr PieceType &operator++(PieceType &pt) { return pt = static_cast<PieceType>(static_cast<int>(pt) + 1); }
+constexpr PieceType &operator--(PieceType &pt) { return pt = static_cast<PieceType>(static_cast<int>(pt) - 1); }
+
+constexpr Square &operator++(Square &sq) { return sq = sq + 1; }
+constexpr Square &operator--(Square &sq) { return sq = sq - 1; }
+
+constexpr Colour &operator++(Colour &colour) { return colour = static_cast<Colour>(static_cast<int>(colour) + 1); }
+constexpr Colour &operator--(Colour &colour) { return colour = static_cast<Colour>(static_cast<int>(colour) - 1); }
+
+[[nodiscard]] constexpr CastlingRights operator|(CastlingRights a, CastlingRights b) { return static_cast<CastlingRights>(static_cast<uint8_t>(a) | static_cast<uint8_t>(b)); }
+[[nodiscard]] constexpr CastlingRights operator&(CastlingRights a, CastlingRights b) { return static_cast<CastlingRights>(static_cast<uint8_t>(a) & static_cast<uint8_t>(b)); }
+[[nodiscard]] constexpr CastlingRights operator~(CastlingRights cr) { return static_cast<CastlingRights>(~static_cast<uint8_t>(cr)); }
+
+constexpr CastlingRights &operator|=(CastlingRights &a, CastlingRights b) { return a = a | b; }
+constexpr CastlingRights &operator&=(CastlingRights &a, CastlingRights b) { return a = a & b; }
+
 [[nodiscard]] constexpr Colour orient(Colour a, Colour b)
 {
     assert(a != Colour::None);
@@ -76,25 +141,25 @@ enum class Piece : int
 {
     assert(rank < 8);
     assert(file < 8);
-    return static_cast<Square>((rank << 3) | file);
+    return static_cast<Square>(rank << 3 | file);
 }
 
 [[nodiscard]] constexpr int rank_of(Square square)
 {
     assert(square != Square::None);
-    return static_cast<int>(square) >> 3;
+    return static_cast<int>(square >> 3);
 }
 
 [[nodiscard]] constexpr int file_of(Square square)
 {
     assert(square != Square::None);
-    return static_cast<int>(square) & 0b111;
+    return static_cast<int>(square & 0b111);
 }
 
 [[nodiscard]] constexpr Square orient(Square sq, Colour c)
 {
     assert(sq != Square::None);
-    return static_cast<Square>(static_cast<int>(sq) ^ (static_cast<int>(c) * 0b111000));
+    return sq ^ (static_cast<int>(c) * 0b111000);
 }
 
 [[nodiscard]] constexpr Square flip(Square sq)
@@ -106,7 +171,7 @@ enum class Piece : int
 [[nodiscard]] constexpr Square mirror(Square sq)
 {
     assert(sq != Square::None);
-    return static_cast<Square>(static_cast<int>(sq) ^ 0b000111);
+    return sq ^ 0b000111;
 }
 
 [[nodiscard]] constexpr Piece make_piece(Colour colour, PieceType pieceType)
@@ -140,7 +205,7 @@ enum class Piece : int
     return orient(piece, Colour::Black);
 }
 
-[[nodiscard]] constexpr Piece from_char(char c)
+[[nodiscard]] constexpr Piece piece_from_char(char c)
 {
     switch (c)
     {
@@ -160,7 +225,7 @@ enum class Piece : int
     }
 }
 
-[[nodiscard]] constexpr char to_char(Piece piece)
+[[nodiscard]] constexpr char piece_to_char(Piece piece)
 {
     switch (piece)
     {
@@ -179,4 +244,27 @@ enum class Piece : int
         case Piece::  BlackKing: return 'k';
         default: return ' ';
     }
+}
+
+[[nodiscard]] constexpr Direction flip(Direction dir)
+{
+    switch (dir)
+    {
+        case Direction::Up       : return Direction::Down;
+        case Direction::Down     : return Direction::Up;
+        case Direction::Left     : return Direction::Right;
+        case Direction::Right    : return Direction::Left;
+        case Direction::UpLeft   : return Direction::DownLeft;
+        case Direction::UpRight  : return Direction::DownRight;
+        case Direction::DownLeft : return Direction::UpLeft;
+        case Direction::DownRight: return Direction::UpRight;
+        default: assert(false);
+    }
+}
+
+[[nodiscard]] constexpr Direction orient(Direction dir, Colour colour)
+{
+    assert(colour != Colour::None);
+    return colour == Colour::White ? dir
+                                   : flip(dir);
 }

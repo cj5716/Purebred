@@ -17,5 +17,4 @@
  */
 
 #pragma once
-
-void uci_loop(int argc, const char *argv[]);
+#include "engine.h"

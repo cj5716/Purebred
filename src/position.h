@@ -17,13 +17,73 @@
  */
 
 #pragma once
-
+#include <cstdint>
 #include "bitboard.h"
 #include "types.h"
+#include "utils.h"
+
+struct Board
+{
+    Array<Bitboard, Piece::NumTypes>        bitboards;
+    Array<Bitboard, Colour::NumTypes>       occupancies;
+    Array<Piece, Square::NumTypes>          mailbox;
+    Array<Bitboard, Colour::NumTypes>       threats;
+    Array<CastlingRights, Colour::NumTypes> castlingRights;
+
+    inline void reset()
+    {
+        for (Bitboard       &bb : bitboards)      bb = Bitboard::Empty;
+        for (Bitboard       &bb : occupancies)    bb = Bitboard::Empty;
+        for (Piece          &pc : mailbox)        pc = Piece::None;
+        for (Bitboard       &bb : threats)        bb = Bitboard::Empty;
+        for (CastlingRights &cr : castlingRights) cr = CastlingRights::None;
+    }
+
+    inline Piece piece_on(Square sq) { return mailbox[sq]; }
+
+    void add_piece(Piece pc, Square sq);
+    void remove_piece(Piece pc, Square sq);
+    void move_piece(Piece pc, Square from, Square to);
+};
 
 struct BoardState
 {
-    Array <Bitboard, Piece::NumTypes> bitboards;
-    
+    Board   &board;
+    Bitboard checkers;
+    Bitboard checkMask;
+    Bitboard pinned;
+    int      totalPlyCount;
+    int      hundredPlyCount;
+    Square   enPassant;
+    Colour   sideToMove;
 
+    inline void add_piece(Piece pc, Square sq) { board.add_piece(pc, sq); };
+    inline void remove_piece(Piece pc, Square sq) { board.remove_piece(pc, sq); };
+    inline void move_piece(Piece pc, Square from, Square to) { board.move_piece(pc, from, to); };
+    inline Piece piece_on(Square sq) { return board.piece_on(sq); }
+
+    inline void reset()
+    {
+        board.reset();
+        checkers        = Bitboard::Empty;
+        checkMask       = Bitboard::Empty;
+        pinned          = Bitboard::Empty;
+        totalPlyCount   = 0;
+        hundredPlyCount = 0;
+        enPassant       = Square::None;
+        sideToMove      = Colour::None;
+    }
+};
+
+struct Position
+{
+    ArrayVec<Board, MaxPly>      boards;
+    ArrayVec<BoardState, MaxPly> boardStates;
+    BoardState &state;
+
+    Array<Square, 2> kingCastleSquares;
+    Array<Square, 2> queenCastleSquares;
+
+    void set_fen(std::string &fen);
+    void display_board() const;
 };

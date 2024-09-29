@@ -16,6 +16,6 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-void uci_loop(int argc, const char *argv[]);
+inline PawnAttacks  [Colour::NumTypes][Square::NumTypes];
+inline KnightAttacks[Square::NumTypes];
+inline BishopAttacks[Square::NumTypes];

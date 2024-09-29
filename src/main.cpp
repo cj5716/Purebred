@@ -18,6 +18,7 @@
 
 #include "uci.h"
 
-int main(int argc, const char *argv[]) {
+int main(int argc, const char *argv[])
+{
     uci_loop(argc, argv);
 }

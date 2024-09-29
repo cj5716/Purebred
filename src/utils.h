@@ -18,50 +18,122 @@
 
 #pragma once
 #include <array>
+#include <cassert>
 #include <cstdint>
+#include <span>
+#include <string>
+#include <vector>
 
-// Thanks to Stormphrax for this code for multiple-dimensional arrays without ugly nesting
-template <typename T, size_t N, size_t... Ns>
+template <typename T, auto N>
+class AutoIdxArray
+{
+public:
+    AutoIdxArray() = default;
+    AutoIdxArray(std::array<T, static_cast<size_t>(N)> data) { for (size_t i = 0; i < static_cast<size_t>(N); ++i) inner[i] = data[i]; }
+    [[nodiscard]] constexpr T &operator[](auto idx) { return inner[static_cast<size_t>(idx)]; }
+    [[nodiscard]] constexpr const T &operator[](auto idx) const { return inner[static_cast<size_t>(idx)]; }
+    [[nodiscard]] constexpr T &front() { return inner.front(); }
+    [[nodiscard]] constexpr const T &front() const { return inner.front(); }
+    [[nodiscard]] constexpr auto data() { return inner.data(); }
+    [[nodiscard]] constexpr auto data() const { return inner.data(); }
+    [[nodiscard]] constexpr auto begin() { return inner.begin(); }
+    [[nodiscard]] constexpr auto begin() const { return inner.begin(); }
+    [[nodiscard]] constexpr auto cbegin() const { return inner.cbegin(); }
+    [[nodiscard]] constexpr auto end() { return inner.end(); }
+    [[nodiscard]] constexpr auto end() const { return inner.end(); }
+    [[nodiscard]] constexpr auto cend() const { return inner.cend(); }
+    [[nodiscard]] constexpr auto rbegin() { return inner.rbegin(); }
+    [[nodiscard]] constexpr auto rbegin() const { return inner.rbegin(); }
+    [[nodiscard]] constexpr auto crbegin() const { return inner.crbegin(); }
+    [[nodiscard]] constexpr auto rend() { return inner.rend(); }
+    [[nodiscard]] constexpr auto rend() const { return inner.rend(); }
+    [[nodiscard]] constexpr auto crend() const { return inner.crend(); }
+    [[nodiscard]] constexpr bool empty() const { return inner.empty(); }
+    [[nodiscard]] constexpr bool size() const { return inner.size(); }
+    [[nodiscard]] constexpr bool max_size() const { return inner.max_size(); }
+    constexpr void fill(T &val) { inner.fill(val); }
+    constexpr void swap(AutoIdxArray &other) { inner.swap(other); }
+    [[nodiscard]] constexpr T &array() { return inner; }
+    [[nodiscard]] constexpr const T &array() const { return inner; }
+    constexpr operator std::array<T, static_cast<size_t>(N)> &() { return inner; }
+    constexpr operator const std::array<T, static_cast<size_t>(N)> &() const { return inner; }
+    constexpr operator std::span<T, static_cast<size_t>(N)> &() { return inner; }
+    constexpr operator const std::span<T, static_cast<size_t>(N)> &() const { return inner; }
+
+private:
+    std::array<T, static_cast<size_t>(N)> inner;
+};
+
+template <typename T, auto N>
+auto swap(AutoIdxArray<T, N> &a, AutoIdxArray<T, N> &b) { a.swap(b); }
+
+template <typename T, auto N, auto... Ns>
 struct ArrayImpl
 {
-    using Type = std::array<typename ArrayImpl<T, Ns...>::Type, N>;
+    using Type = AutoIdxArray<typename ArrayImpl<T, Ns...>::Type, N>;
 };
 
-template <typename T, size_t N>
+template <typename T, auto N>
 struct ArrayImpl<T, N>
 {
-    using Type = std::array<T, N>;
+    using Type = AutoIdxArray<T, N>;
 };
 
-template <typename T, size_t... Ns>
+template <typename T, auto... Ns>
 using Array = typename ArrayImpl<T, Ns...>::Type;
 
 template<typename T, size_t Size>
-class ArrayVec {
+struct ArrayVec {
 
 public:
     size_t size() const { return currSize; }
 
-    void push_back(const T &value) {
-        values.at(currSize) = value;
+    void push_back(const T &value)
+    {
+        values[currSize] = value;
         currSize++;
-        assert(currSize < Size);
+        assert(currSize <= Size);
     }
 
-    void push_back() {
+    void push_back()
+    {
         currSize++;
-        assert(currSize < Size);
+        assert(currSize <= Size);
     }
 
-    void pop_back() {
-        assert(currSize > 0);
+    void pop_back()
+    {
         currSize--;
+        assert(currSize >= 0);
     }
 
-    T &back() { return values.at(currSize - 1); }
-    T &at(int index) { return values.at(index); }
+    void resize(size_t newSize)
+    {
+        assert(0 <= newSize && newSize <= Size);
+        currSize = newSize;
+    }
+
+    [[nodiscard]] T &back() { return values[currSize - 1]; }
+    [[nodiscard]] T &operator[](size_t index) { return values[index]; }
 
 private:
     Array<T, Size> values;
     size_t currSize;
 };
+
+[[nodiscard]] inline std::vector<std::string> split_string(const std::string &str, const std::string &delim)
+{
+    size_t pos_start = 0, pos_end, delim_len = delim.length();
+    std::string token;
+    std::vector<std::string> res;
+
+    while ((pos_end = str.find(delim, pos_start)) != std::string::npos)
+    {
+        token = str.substr(pos_start, pos_end - pos_start);
+        pos_start = pos_end + delim_len;
+        res.push_back(token);
+    }
+
+    res.push_back(str.substr(pos_start));
+    return res;
+}
