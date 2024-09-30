@@ -157,7 +157,7 @@ void Position::set_fen(std::string &fen)
     state.totalPlyCount = std::stoi(totalPlies);
 }
 
-void display_board() const
+void Position::display_board() const
 {
     std::cout << "\n";
 
@@ -171,6 +171,7 @@ void display_board() const
                 std::cout << "  " << rank << " ";
 
             const Piece pc = state.piece_on(sq);
+            std::cout << " " << piece_to_char(pc);
         }
 
         std::cout << "\n";
@@ -179,7 +180,7 @@ void display_board() const
     std::cout << "\n     a b c d e f g h\n\n";
 
     std::cout << "     Side:     ";
-    std::cout << state.sideToMove == Colour::White ? "White"
-                                                   : "Black";
+    std::cout << (state.sideToMove == Colour::White ? "White"
+                                                    : "Black");
     std::cout << "\n";
 };
