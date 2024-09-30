@@ -16,6 +16,7 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
 #include <bit>
 #include <cstdint>
 #include "types.h"

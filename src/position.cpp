@@ -17,8 +17,10 @@
  */
 
 #pragma once
+#include <iostream>
 #include <string>
 #include "bitboard.h"
+#include "position.h"
 #include "types.h"
 #include "utils.h"
 

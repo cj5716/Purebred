@@ -29,7 +29,7 @@ class AutoIdxArray
 {
 public:
     AutoIdxArray() = default;
-    AutoIdxArray(std::array<T, static_cast<size_t>(N)> data) { for (size_t i = 0; i < static_cast<size_t>(N); ++i) inner[i] = data[i]; }
+    constexpr AutoIdxArray(const std::initializer_list<T> &data) { std::copy(data.begin(), data.end(), inner.begin()); }
     [[nodiscard]] constexpr T &operator[](auto idx) { return inner[static_cast<size_t>(idx)]; }
     [[nodiscard]] constexpr const T &operator[](auto idx) const { return inner[static_cast<size_t>(idx)]; }
     [[nodiscard]] constexpr T &front() { return inner.front(); }
