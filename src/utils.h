@@ -114,7 +114,9 @@ public:
     }
 
     [[nodiscard]] T &back() { return values[currSize - 1]; }
+    [[nodiscard]] const T &back() const { return values[currSize - 1]; }
     [[nodiscard]] T &operator[](size_t index) { return values[index]; }
+    [[nodiscard]] const T &operator[](size_t index) const { return values[index]; }
 
 private:
     Array<T, Size> values;

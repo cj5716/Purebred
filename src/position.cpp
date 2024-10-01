@@ -24,51 +24,15 @@
 #include "types.h"
 #include "utils.h"
 
-void Board::add_piece(Piece pc, Square sq)
-{
-    assert(pc != Piece::None);
-    assert(sq != Square::None);
-    assert(mailbox[sq] == Piece::None);
-    assert(bitboards[pc] & square_bb(sq) == 0);
-    assert(occupancies[colour_of(pc)] & square_bb(sq) == 0);
-
-    bitboards[pc]              ^= square_bb(sq);
-    occupancies[colour_of(pc)] ^= square_bb(sq);
-    mailbox[sq]                 = pc;
-}
-
-void Board::remove_piece(Piece pc, Square sq)
-{
-    assert(pc != Piece::None);
-    assert(sq != Square::None);
-    assert(mailbox[sq] == pc);
-    assert(bitboards[pc] & square_bb(sq) != 0);
-    assert(occupancies[colour_of(pc)] & square_bb(sq) != 0);
-
-    bitboards[pc]              ^= square_bb(sq);
-    occupancies[colour_of(pc)] ^= square_bb(sq);
-    mailbox[sq]                 = Piece::None;
-}
-
-void Board::move_piece(Piece pc, Square from, Square to)
-{
-    add_piece(pc, from);
-    remove_piece(pc, to);
-}
-
-void Position::set_fen(std::string &fen)
+void Position::set_fen(std::string fen)
 {
     // Reset boards
-    boards.resize(1);
-    boardStates.resize(1);
-    state = boardStates.back();
+    reset();
+
     kingCastleSquares [Colour::White] = Square::None;
     kingCastleSquares [Colour::Black] = Square::None;
     queenCastleSquares[Colour::White] = Square::None;
     queenCastleSquares[Colour::White] = Square::None;
-
-    // Clear current board
-    state.reset();
 
     // Split the FEN into the 4 main parts
     std::vector<std::string> tokens = split_string(fen, " ");
@@ -96,7 +60,7 @@ void Position::set_fen(std::string &fen)
                 fenCounter++;
                 const Piece pc = piece_from_char(currChar);
                 if (pc != Piece::None)
-                    state.add_piece(pc, sq);
+                    add_piece(pc, sq);
             }
 
             // FENs use numbers to denote empty squares
@@ -106,7 +70,7 @@ void Position::set_fen(std::string &fen)
                 int offset = currChar - '0';
 
                 // If our current square is empty, we incremented 1 during iteration for nothing; subtract 1 from the offset
-                const Piece pc = state.piece_on(sq);
+                const Piece pc = board().piece_on(sq);
                 if (pc == Piece::None) offset--;
 
                 // Adjust file coutner based on number of empty squares
@@ -120,7 +84,7 @@ void Position::set_fen(std::string &fen)
     }
 
     // Set the side to move
-    state.sideToMove = stmStr == "w" ? Colour::White : Colour::Black;
+    state().sideToMove = stmStr == "w" ? Colour::White : Colour::Black;
 
     // Parse castling rights
     // TODO: Handle DFRC and FRC using state.
@@ -132,14 +96,14 @@ void Position::set_fen(std::string &fen)
     // Set the relevant rights whenever we detect them within the FEN
     for (const char c : castleStr)
     {
-        if (c == 'K')      state.board.castlingRights[Colour::White] |= CastlingRights::King;
-        else if (c == 'k') state.board.castlingRights[Colour::Black] |= CastlingRights::King;
-        else if (c == 'Q') state.board.castlingRights[Colour::White] |= CastlingRights::Queen;
-        else if (c == 'q') state.board.castlingRights[Colour::Black] |= CastlingRights::Queen;
+        if (c == 'K')      board().castlingRights[Colour::White] |= CastlingRights::King;
+        else if (c == 'k') board().castlingRights[Colour::Black] |= CastlingRights::King;
+        else if (c == 'Q') board().castlingRights[Colour::White] |= CastlingRights::Queen;
+        else if (c == 'q') board().castlingRights[Colour::Black] |= CastlingRights::Queen;
     }
 
     // Set the EP square if present
-    state.enPassant = [&]() {
+    state().enPassant = [&]() {
 
         // Empty field, EP not legal
         if (epStr == "-") return Square::None;
@@ -151,10 +115,10 @@ void Position::set_fen(std::string &fen)
     }();
 
     // Set the 50 move counter (or 100 ply counter)
-    state.hundredPlyCount = std::stoi(hundredPly);
+    state().hundredPlyCount = std::stoi(hundredPly);
 
     // Set the total ply counter
-    state.totalPlyCount = std::stoi(totalPlies);
+    state().totalPlyCount = std::stoi(totalPlies);
 }
 
 void Position::display_board() const
@@ -170,7 +134,7 @@ void Position::display_board() const
             if (file == 0)
                 std::cout << "  " << rank << " ";
 
-            const Piece pc = state.piece_on(sq);
+            const Piece pc = board().piece_on(sq);
             std::cout << " " << piece_to_char(pc);
         }
 
@@ -180,7 +144,7 @@ void Position::display_board() const
     std::cout << "\n     a b c d e f g h\n\n";
 
     std::cout << "     Side:     ";
-    std::cout << (state.sideToMove == Colour::White ? "White"
-                                                    : "Black");
+    std::cout << (state().sideToMove == Colour::White ? "White"
+                                                      : "Black");
     std::cout << "\n";
 };

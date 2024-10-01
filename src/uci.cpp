@@ -19,6 +19,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include "engine.h"
 #include "types.h"
 #include "uci.h"
 #include "utils.h"
@@ -47,7 +48,7 @@ void uci_loop(int argc, const char *argv[])
 
         else if (tokens[0] == "position")
         {
-            string fen;
+            std::string fen;
             if (tokens[1] == "startpos")
                 fen = std::string(StartPos);
 

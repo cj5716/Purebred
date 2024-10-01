@@ -39,16 +39,44 @@ struct Board
         for (CastlingRights &cr : castlingRights) cr = CastlingRights::None;
     }
 
-    inline Piece piece_on(Square sq) { return mailbox[sq]; }
+    inline Piece piece_on(Square sq) const { return mailbox[sq]; }
 
-    void add_piece(Piece pc, Square sq);
-    void remove_piece(Piece pc, Square sq);
-    void move_piece(Piece pc, Square from, Square to);
+    inline void add_piece(Piece pc, Square sq)
+    {
+        assert(pc != Piece::None);
+        assert(sq != Square::None);
+        assert(mailbox[sq] == Piece::None);
+        assert(bitboards[pc] & square_bb(sq) == 0);
+        assert(occupancies[colour_of(pc)] & square_bb(sq) == 0);
+
+        bitboards[pc]              ^= square_bb(sq);
+        occupancies[colour_of(pc)] ^= square_bb(sq);
+        mailbox[sq]                 = pc;
+    }
+
+    inline void remove_piece(Piece pc, Square sq)
+    {
+        assert(pc != Piece::None);
+        assert(sq != Square::None);
+        assert(mailbox[sq] == pc);
+        assert(bitboards[pc] & square_bb(sq) != 0);
+        assert(occupancies[colour_of(pc)] & square_bb(sq) != 0);
+
+        bitboards[pc]              ^= square_bb(sq);
+        occupancies[colour_of(pc)] ^= square_bb(sq);
+        mailbox[sq]                 = Piece::None;
+    }
+
+
+    inline void move_piece(Piece pc, Square from, Square to)
+    {
+        add_piece(pc, from);
+        remove_piece(pc, to);
+    }
 };
 
 struct BoardState
 {
-    Board   &board;
     Bitboard checkers;
     Bitboard checkMask;
     Bitboard pinned;
@@ -57,14 +85,16 @@ struct BoardState
     Square   enPassant;
     Colour   sideToMove;
 
-    inline void add_piece(Piece pc, Square sq) { board.add_piece(pc, sq); };
-    inline void remove_piece(Piece pc, Square sq) { board.remove_piece(pc, sq); };
-    inline void move_piece(Piece pc, Square from, Square to) { board.move_piece(pc, from, to); };
-    inline Piece piece_on(Square sq) { return board.piece_on(sq); }
+    inline void add_piece(Piece pc, Square sq){ ; }
+    inline void remove_piece(Piece pc, Square sq) { ; }
+    inline void move_piece(Piece pc, Square from, Square to)
+    {
+        add_piece(pc, from);
+        remove_piece(pc, to);
+    }
 
     inline void reset()
     {
-        board.reset();
         checkers        = Bitboard::Empty;
         checkMask       = Bitboard::Empty;
         pinned          = Bitboard::Empty;
@@ -79,11 +109,39 @@ struct Position
 {
     ArrayVec<Board, MaxPly>      boards;
     ArrayVec<BoardState, MaxPly> boardStates;
-    BoardState &state;
 
     Array<Square, 2> kingCastleSquares;
     Array<Square, 2> queenCastleSquares;
 
-    void set_fen(std::string &fen);
+    void set_fen(std::string fen);
     void display_board() const;
+    inline Board &board() { return boards.back(); }
+    inline const Board &board() const { return boards.back(); }
+    inline BoardState &state() { return boardStates.back(); }
+    inline const BoardState &state() const { return boardStates.back(); }
+    inline void add_piece(Piece pc, Square sq)
+    {
+        state().add_piece(pc, sq);
+        board().add_piece(pc, sq);
+    }
+
+    inline void remove_piece(Piece pc, Square sq)
+    {
+        state().remove_piece(pc, sq);
+        board().remove_piece(pc, sq);
+    }
+
+    inline void move_piece(Piece pc, Square from, Square to)
+    {
+        add_piece(pc, from);
+        remove_piece(pc, to);
+    }
+
+    inline void reset()
+    {
+        boards.resize(1);
+        boardStates.resize(1);
+        board().reset();
+        state().reset();
+    }
 };

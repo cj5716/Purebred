@@ -22,6 +22,6 @@
 struct Engine
 {
     Position pos;
-    inline void set_fen(std::string &fen) { pos.set_fen(fen); };
+    inline void set_fen(std::string fen) { pos.set_fen(fen); };
     inline void display_board() const { pos.display_board(); }
 };
