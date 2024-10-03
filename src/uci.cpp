@@ -53,8 +53,9 @@ void uci_loop(int argc, const char *argv[])
                 fen = std::string(StartPos);
 
             else if (tokens[1] == "fen")
-                engine.set_fen(line.substr(line.find("fen") + 4, std::string::npos));
+                fen = line.substr(line.find("fen") + 4, std::string::npos);
 
+            engine.set_fen(fen);
         }
 
         else if (line == "d")

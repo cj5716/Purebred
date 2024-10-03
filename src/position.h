@@ -46,8 +46,8 @@ struct Board
         assert(pc != Piece::None);
         assert(sq != Square::None);
         assert(mailbox[sq] == Piece::None);
-        assert(bitboards[pc] & square_bb(sq) == 0);
-        assert(occupancies[colour_of(pc)] & square_bb(sq) == 0);
+        assert((bitboards[pc] & square_bb(sq)) == Bitboard::Empty);
+        assert((occupancies[colour_of(pc)] & square_bb(sq)) == Bitboard::Empty);
 
         bitboards[pc]              ^= square_bb(sq);
         occupancies[colour_of(pc)] ^= square_bb(sq);
@@ -59,8 +59,8 @@ struct Board
         assert(pc != Piece::None);
         assert(sq != Square::None);
         assert(mailbox[sq] == pc);
-        assert(bitboards[pc] & square_bb(sq) != 0);
-        assert(occupancies[colour_of(pc)] & square_bb(sq) != 0);
+        assert((bitboards[pc] & square_bb(sq)) != Bitboard::Empty);
+        assert((occupancies[colour_of(pc)] & square_bb(sq)) != Bitboard::Empty);
 
         bitboards[pc]              ^= square_bb(sq);
         occupancies[colour_of(pc)] ^= square_bb(sq);

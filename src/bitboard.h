@@ -86,7 +86,7 @@ constexpr Array<Bitboard, 8> Ranks({Bitboard::Rank1,
 [[nodiscard]] constexpr int count_set_bits(Bitboard bb) { return std::popcount(static_cast<uint64_t>(bb)); }
 [[nodiscard]] constexpr int get_lsb(Bitboard bb)
 {
-    assert(bb != 0);
+    assert(bb != Bitboard::Empty);
     return std::countr_zero(static_cast<uint64_t>(bb));
 }
 

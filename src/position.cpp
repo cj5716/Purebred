@@ -35,52 +35,38 @@ void Position::set_fen(std::string fen)
     queenCastleSquares[Colour::White] = Square::None;
 
     // Split the FEN into the 4 main parts
-    std::vector<std::string> tokens = split_string(fen, " ");
-    const std::string pieceStr  = tokens[0];
+    const std::vector<std::string> tokens = split_string(fen, " ");
+    const std::string boardStr  = tokens[0];
     const std::string stmStr    = tokens[1];
     const std::string castleStr = tokens[2];
     const std::string epStr     = tokens[3];
 
     // Keep track of the 2 optional parts
-    const std::string hundredPly     = tokens.size() > 4 ? tokens[4] : "0";
-    const std::string totalPlies     = tokens.size() > 5 ? tokens[5] : "0";
+    const std::string hundredPly = tokens.size() > 4 ? tokens[4] : "0";
+    const std::string totalPlies = tokens.size() > 5 ? tokens[5] : "1";
 
-    int fenCounter = 0;
-    for (int rank = 7; rank >= 0; --rank)
+    int currRank = 7;
+    const std::vector<std::string> ranks = split_string(boardStr, "/");
+    for (const std::string &rank : ranks)
     {
-        for (int file = 0; file < 8; ++file)
+        int currFile = 0;
+        for (char c : rank)
         {
-            const Square sq = make_square(rank, file);
-            const char currChar = pieceStr[fenCounter];
-
-            // Convert each char in the string to a piece
-            if (   ('a' <= currChar && currChar <= 'z')
-                || ('A' <= currChar && currChar <= 'Z'))
+            const Piece pc = piece_from_char(c);
+            if (pc == Piece::None)
             {
-                fenCounter++;
-                const Piece pc = piece_from_char(currChar);
-                if (pc != Piece::None)
-                    add_piece(pc, sq);
+                std::string dummy;
+                dummy += c;
+                currFile += std::stoi(dummy);
             }
-
-            // FENs use numbers to denote empty squares
-            if ('0' <= currChar && currChar <= '9')
+            else
             {
-                // Figure out how many empty squares
-                int offset = currChar - '0';
-
-                // If our current square is empty, we incremented 1 during iteration for nothing; subtract 1 from the offset
-                const Piece pc = board().piece_on(sq);
-                if (pc == Piece::None) offset--;
-
-                // Adjust file coutner based on number of empty squares
-                file += offset;
-                fenCounter++;
+                add_piece(pc, make_square(currRank, currFile));
+                currFile++;
             }
-
-            // '/' Denotes a new rank
-            if (pieceStr[fenCounter] == '/') fenCounter++;
         }
+
+        currRank--;
     }
 
     // Set the side to move
@@ -143,8 +129,9 @@ void Position::display_board() const
 
     std::cout << "\n     a b c d e f g h\n\n";
 
-    std::cout << "     Side:     ";
+    std::cout << "     STM:      ";
     std::cout << (state().sideToMove == Colour::White ? "White"
                                                       : "Black");
+
     std::cout << "\n";
 };
