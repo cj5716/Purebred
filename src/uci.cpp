@@ -28,6 +28,7 @@ void uci_loop(int argc, const char *argv[])
 {
     std::cout << Name << " by " << Author << "\n";
 
+    Position pos;
     Engine engine;
 
     const auto parse_uci = [&](std::string &line)
@@ -55,11 +56,11 @@ void uci_loop(int argc, const char *argv[])
             else if (tokens[1] == "fen")
                 fen = line.substr(line.find("fen") + 4, std::string::npos);
 
-            engine.set_fen(fen);
+            pos.set_fen(fen);
         }
 
         else if (line == "d")
-            engine.display_board();
+            pos.display_board();
 
         return true;
     };

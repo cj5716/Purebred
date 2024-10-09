@@ -16,11 +16,9 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "init.h"
-#include "uci.h"
+#include "attacks.h"
 
-int main(int argc, const char *argv[])
+inline void init_lookups()
 {
-    init_lookups();
-    uci_loop(argc, argv);
+    init_attacks();
 }

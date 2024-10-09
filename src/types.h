@@ -105,6 +105,7 @@ enum class CastlingRights : uint8_t
 
 [[nodiscard]] constexpr Direction operator+(Direction a, Direction b) { return static_cast<Direction>(static_cast<int>(a) + static_cast<int>(b)); }
 [[nodiscard]] constexpr Direction operator-(Direction a, Direction b) { return static_cast<Direction>(static_cast<int>(a) - static_cast<int>(b)); }
+[[nodiscard]] constexpr Direction operator*(Direction dir, int mult)  { return static_cast<Direction>(static_cast<int>(dir) * mult); }
 
 constexpr Piece &operator++(Piece &pc) { return pc = static_cast<Piece>(static_cast<int>(pc) + 1); }
 constexpr Piece &operator--(Piece &pc) { return pc = static_cast<Piece>(static_cast<int>(pc) - 1); }
