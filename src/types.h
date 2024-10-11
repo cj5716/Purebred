@@ -107,11 +107,15 @@ enum class CastlingRights : uint8_t
 [[nodiscard]] constexpr Direction operator-(Direction a, Direction b) { return static_cast<Direction>(static_cast<int>(a) - static_cast<int>(b)); }
 [[nodiscard]] constexpr Direction operator*(Direction dir, int mult)  { return static_cast<Direction>(static_cast<int>(dir) * mult); }
 
-constexpr Piece &operator++(Piece &pc) { return pc = static_cast<Piece>(static_cast<int>(pc) + 1); }
-constexpr Piece &operator--(Piece &pc) { return pc = static_cast<Piece>(static_cast<int>(pc) - 1); }
+[[nodiscard]] constexpr Piece operator+(Piece a, Piece b) { return static_cast<Piece>(static_cast<int>(a) + static_cast<int>(b)); }
+[[nodiscard]] constexpr Piece operator-(Piece a, Piece b) { return static_cast<Piece>(static_cast<int>(a) - static_cast<int>(b)); }
+constexpr Piece &operator++(Piece &pc) { return pc = pc + static_cast<Piece>(1); }
+constexpr Piece &operator--(Piece &pc) { return pc = pc - static_cast<Piece>(1); }
 
-constexpr PieceType &operator++(PieceType &pt) { return pt = static_cast<PieceType>(static_cast<int>(pt) + 1); }
-constexpr PieceType &operator--(PieceType &pt) { return pt = static_cast<PieceType>(static_cast<int>(pt) - 1); }
+[[nodiscard]] constexpr PieceType operator+(PieceType a, PieceType b) { return static_cast<PieceType>(static_cast<int>(a) + static_cast<int>(b)); }
+[[nodiscard]] constexpr PieceType operator-(PieceType a, PieceType b) { return static_cast<PieceType>(static_cast<int>(a) - static_cast<int>(b)); }
+constexpr PieceType &operator++(PieceType &pt) { return pt = pt + static_cast<PieceType>(1); }
+constexpr PieceType &operator--(PieceType &pt) { return pt = pt - static_cast<PieceType>(1); }
 
 constexpr Square &operator++(Square &sq) { return sq = sq + 1; }
 constexpr Square &operator--(Square &sq) { return sq = sq - 1; }

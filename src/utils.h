@@ -88,35 +88,35 @@ struct ArrayVec {
 public:
     size_t size() const { return currSize; }
 
-    void push_back(const T &value)
+    constexpr void push_back(const T &value)
     {
         values[currSize] = value;
         currSize++;
         assert(currSize <= Size);
     }
 
-    void push_back()
+    constexpr void push_back()
     {
         currSize++;
         assert(currSize <= Size);
     }
 
-    void pop_back()
+    constexpr void pop_back()
     {
         currSize--;
         assert(currSize >= 0);
     }
 
-    void resize(size_t newSize)
+    constexpr void resize(size_t newSize)
     {
         assert(0 <= newSize && newSize <= Size);
         currSize = newSize;
     }
 
-    [[nodiscard]] T &back() { return values[currSize - 1]; }
-    [[nodiscard]] const T &back() const { return values[currSize - 1]; }
-    [[nodiscard]] T &operator[](size_t index) { return values[index]; }
-    [[nodiscard]] const T &operator[](size_t index) const { return values[index]; }
+    [[nodiscard]] constexpr T &back() { return values[currSize - 1]; }
+    [[nodiscard]] constexpr const T &back() const { return values[currSize - 1]; }
+    [[nodiscard]] constexpr T &operator[](size_t index) { return values[index]; }
+    [[nodiscard]] constexpr const T &operator[](size_t index) const { return values[index]; }
 
 private:
     Array<T, Size> values;

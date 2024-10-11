@@ -22,6 +22,7 @@
 #include "types.h"
 #include "utils.h"
 
+class Move;
 struct Board
 {
     Array<Bitboard, Piece::NumTypes>        bitboards;
@@ -30,7 +31,7 @@ struct Board
     Array<Bitboard, Colour::NumTypes>       threats;
     Array<CastlingRights, Colour::NumTypes> castlingRights;
 
-    inline void reset()
+    constexpr void reset()
     {
         for (Bitboard       &bb : bitboards)      bb = Bitboard::Empty;
         for (Bitboard       &bb : occupancies)    bb = Bitboard::Empty;
@@ -39,9 +40,9 @@ struct Board
         for (CastlingRights &cr : castlingRights) cr = CastlingRights::None;
     }
 
-    inline Piece piece_on(Square sq) const { return mailbox[sq]; }
+    constexpr Piece piece_on(Square sq) const { return mailbox[sq]; }
 
-    inline void add_piece(Piece pc, Square sq)
+    constexpr void add_piece(Piece pc, Square sq)
     {
         assert(pc != Piece::None);
         assert(sq != Square::None);
@@ -54,7 +55,7 @@ struct Board
         mailbox[sq]                 = pc;
     }
 
-    inline void remove_piece(Piece pc, Square sq)
+    constexpr void remove_piece(Piece pc, Square sq)
     {
         assert(pc != Piece::None);
         assert(sq != Square::None);
@@ -68,7 +69,7 @@ struct Board
     }
 
 
-    inline void move_piece(Piece pc, Square from, Square to)
+    constexpr void move_piece(Piece pc, Square from, Square to)
     {
         add_piece(pc, from);
         remove_piece(pc, to);
@@ -85,15 +86,15 @@ struct BoardState
     Square   enPassant;
     Colour   sideToMove;
 
-    inline void add_piece(Piece pc, Square sq){ ; }
-    inline void remove_piece(Piece pc, Square sq) { ; }
-    inline void move_piece(Piece pc, Square from, Square to)
+    constexpr void add_piece(Piece pc, Square sq){ ; }
+    constexpr void remove_piece(Piece pc, Square sq) { ; }
+    constexpr void move_piece(Piece pc, Square from, Square to)
     {
         add_piece(pc, from);
         remove_piece(pc, to);
     }
 
-    inline void reset()
+    constexpr void reset()
     {
         checkers        = Bitboard::Empty;
         checkMask       = Bitboard::Empty;
@@ -115,33 +116,35 @@ struct Position
 
     void set_fen(std::string fen);
     void display_board() const;
-    inline Board &board() { return boards.back(); }
-    inline const Board &board() const { return boards.back(); }
-    inline BoardState &state() { return boardStates.back(); }
-    inline const BoardState &state() const { return boardStates.back(); }
-    inline void add_piece(Piece pc, Square sq)
+    constexpr Board &board() { return boards.back(); }
+    constexpr const Board &board() const { return boards.back(); }
+    constexpr BoardState &state() { return boardStates.back(); }
+    constexpr const BoardState &state() const { return boardStates.back(); }
+    constexpr void add_piece(Piece pc, Square sq)
     {
         state().add_piece(pc, sq);
         board().add_piece(pc, sq);
     }
 
-    inline void remove_piece(Piece pc, Square sq)
+    constexpr void remove_piece(Piece pc, Square sq)
     {
         state().remove_piece(pc, sq);
         board().remove_piece(pc, sq);
     }
 
-    inline void move_piece(Piece pc, Square from, Square to)
+    constexpr void move_piece(Piece pc, Square from, Square to)
     {
         add_piece(pc, from);
         remove_piece(pc, to);
     }
 
-    inline void reset()
+    constexpr void reset()
     {
         boards.resize(1);
         boardStates.resize(1);
         board().reset();
         state().reset();
     }
+
+    constexpr bool is_legal(Move move) const;
 };

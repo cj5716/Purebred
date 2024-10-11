@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include "bitboard.h"
+#include "move.h"
 #include "position.h"
 #include "types.h"
 #include "utils.h"
@@ -134,4 +135,9 @@ void Position::display_board() const
                                                       : "Black");
 
     std::cout << "\n";
+};
+
+constexpr bool Position::is_legal(Move move) const
+{
+    return true;
 };
