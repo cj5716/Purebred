@@ -130,9 +130,14 @@ void Position::display_board() const
 
     std::cout << "\n     a b c d e f g h\n\n";
 
-    std::cout << "     STM:      ";
+    std::cout << "     STM:       ";
     std::cout << (state().sideToMove == Colour::White ? "White"
                                                       : "Black");
+
+    std::cout << "\n";
+
+    std::cout << "     EP SQUARE: ";
+    std::cout << square_to_string(state().enPassant);
 
     std::cout << "\n";
 };

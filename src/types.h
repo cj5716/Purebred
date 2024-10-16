@@ -251,6 +251,26 @@ constexpr CastlingRights &operator&=(CastlingRights &a, CastlingRights b) { retu
     }
 }
 
+[[nodiscard]] constexpr PieceType piecetype_from_char(char c)
+{
+    return type_of(piece_from_char(c));
+}
+
+[[nodiscard]] constexpr char piecetype_to_char(PieceType pt)
+{
+    return piece_to_char(make_piece(Colour::White, pt));
+}
+
+[[nodiscard]] constexpr std::string square_to_string(Square sq)
+{
+    if (sq == Square::None) return "--";
+
+    std::string ret{};
+    ret += 'a' + file_of(sq);
+    ret += '1' + rank_of(sq);
+    return ret;
+}
+
 [[nodiscard]] constexpr Direction flip(Direction dir)
 {
     switch (dir)

@@ -20,6 +20,7 @@
 #include <iostream>
 #include <vector>
 #include "engine.h"
+#include "move.h"
 #include "types.h"
 #include "uci.h"
 #include "utils.h"
@@ -57,6 +58,12 @@ void uci_loop(int argc, const char *argv[])
                 fen = line.substr(line.find("fen") + 4, std::string::npos);
 
             pos.set_fen(fen);
+        }
+
+        else if (tokens[0] == "go")
+        {
+            Move bestMove = Move::None();
+            std::cout << "bestmove " << bestMove.as_string() << "\n";
         }
 
         else if (line == "d")

@@ -16,6 +16,8 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <cstdint>
+#include <string>
 #include "position.h"
 #include "types.h"
 
@@ -51,7 +53,7 @@ public:
     constexpr Move(PackedMove &packed, Position &pos);
 
     constexpr uint32_t raw() const { return data; }
-    constexpr Move None() const { return Move(0); }
+    static constexpr Move None() { return Move(0); }
 
     constexpr Square from_sq() const { return static_cast<Square>(data & 0x3F); }
     constexpr Square to_sq()   const { return static_cast<Square>((data >> 6) & 0x3F); }
@@ -68,6 +70,19 @@ public:
     {
         assert(is_promo());
         return static_cast<PieceType>(move_type() & static_cast<MoveType>(0b0011)) + PieceType::Knight;
+    }
+
+    constexpr std::string as_string() const
+    {
+        std::string ret{};
+        const Square from = from_sq();
+        const Square to   = to_sq();
+
+        ret += square_to_string(from);
+        ret += square_to_string(to);
+        if (is_promo()) ret += piecetype_to_char(promo_type());
+
+        return ret;
     }
 
     [[nodiscard]] constexpr bool operator==(const Move &move) const { return data == move.raw(); }
