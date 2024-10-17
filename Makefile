@@ -14,8 +14,7 @@ NONDEBUG := -DNDEBUG
 
 SSE41FLAGS   := -DUSE_SSE41 -msse4.1
 AVXFLAGS     := -DUSE_AVX -mavx $(SSE41FLAGS)
-FMAFLAGS     := -DUSE_FMA -mfma $(AVXFLAGS)
-AVX2FLAGS    := -DUSE_AVX2 -mavx2 $(FMAFLAGS)
+AVX2FLAGS    := -DUSE_AVX2 -mavx2 $(AVXFLAGS)
 AVX512FLAGS  := -DUSE_AVX512 -mavx512f -mavx512bw $(AVX2FLAGS)
 VNNI512FLAGS := -DUSE_VNNI -mavx512vnni $(AVX512FLAGS)
 ARCHFLAGS	:=
@@ -66,10 +65,6 @@ ifneq ($(findstring __AVX__, $(PROPERTIES)),)
 	DETECTED_FLAGS := $(AVXFLAGS)
 endif
 
-ifneq ($(findstring __FMA__, $(PROPERTIES)),)
-	DETECTED_FLAGS := $(FMAFLAGS)
-endif
-
 ifneq ($(findstring __AVX2__, $(PROPERTIES)),)
 	DETECTED_FLAGS := $(AVX2FLAGS)
 endif
@@ -103,12 +98,6 @@ endif
 ifeq ($(BUILD), x86-64-avx)
 	NATIVE := -march=sandybridge
 	ARCHFLAGS := $(AVXFLAGS)
-	BUILT := YES
-endif
-
-ifeq ($(BUILD), x86-64-fma)
-	NATIVE := -march=bdver2
-	ARCHFLAGS := $(FMAFLAGS)
 	BUILT := YES
 endif
 
