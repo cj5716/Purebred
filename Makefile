@@ -12,9 +12,7 @@ NORMAL   := -O3 -std=c++20 $(WARNINGS) -funroll-loops -flto -fno-exceptions
 DEBUGS   := -g3 -fno-omit-frame-pointer -fsanitize=address -fsanitize=leak -fsanitize=undefined
 NONDEBUG := -DNDEBUG
 
-SSE41FLAGS   := -DUSE_SSE41 -msse4.1
-AVXFLAGS     := -DUSE_AVX -mavx $(SSE41FLAGS)
-FMAFLAGS     := -DUSE_FMA -mfma $(AVXFLAGS)
+FMAFLAGS     := -DUSE_FMA -mfma -mavx
 AVX2FLAGS    := -DUSE_AVX2 -mavx2 $(FMAFLAGS)
 AVX512FLAGS  := -DUSE_AVX512 -mavx512f -mavx512bw $(AVX2FLAGS)
 VNNI512FLAGS := -DUSE_VNNI -mavx512vnni $(AVX512FLAGS)
@@ -57,14 +55,6 @@ endif
 
 PROPERTIES     := $(shell echo | $(CXX) -march=native -E -dM -)
 DETECTED_FLAGS :=
-ifneq ($(findstring __SSE41__, $(PROPERTIES)),)
-	DETECTED_FLAGS := $(SSE41FLAGS)missing separator.  Stop.
-
-endif
-
-ifneq ($(findstring __AVX__, $(PROPERTIES)),)
-	DETECTED_FLAGS := $(AVXFLAGS)
-endif
 
 ifneq ($(findstring __FMA__, $(PROPERTIES)),)
 	DETECTED_FLAGS := $(FMAFLAGS)
@@ -91,18 +81,6 @@ endif
 ifeq ($(BUILD), x86-64)
 	NATIVE := -mtune=znver1
 	ARCHFLAGS :=
-	BUILT := YES
-endif
-
-ifeq ($(BUILD), x86-64-sse41)
-	NATIVE := -march=nehalem
-	ARCHFLAGS := $(SSE41FLAGS)
-	BUILT := YES
-endif
-
-ifeq ($(BUILD), x86-64-avx)
-	NATIVE := -march=sandybridge
-	ARCHFLAGS := $(AVXFLAGS)
 	BUILT := YES
 endif
 
