@@ -28,7 +28,6 @@ struct Board
     Array<Bitboard, Piece::NumTypes>        bitboards;
     Array<Bitboard, Colour::NumTypes>       occupancies;
     Array<Piece, Square::NumTypes>          mailbox;
-    Array<Bitboard, Colour::NumTypes>       threats;
     Array<CastlingRights, Colour::NumTypes> castlingRights;
 
     constexpr void reset()
@@ -36,7 +35,6 @@ struct Board
         for (Bitboard       &bb : bitboards)      bb = Bitboard::Empty;
         for (Bitboard       &bb : occupancies)    bb = Bitboard::Empty;
         for (Piece          &pc : mailbox)        pc = Piece::None;
-        for (Bitboard       &bb : threats)        bb = Bitboard::Empty;
         for (CastlingRights &cr : castlingRights) cr = CastlingRights::None;
     }
 
@@ -146,5 +144,6 @@ struct Position
         state().reset();
     }
 
+    constexpr void update_masks();
     constexpr bool is_legal(Move move) const;
 };

@@ -90,12 +90,11 @@ constexpr Array<Bitboard, 8> Ranks({Bitboard::Rank1,
 
 [[nodiscard]] constexpr Bitboard square_bb(Square sq) { return static_cast<Bitboard>(1) << static_cast<int>(sq); }
 [[nodiscard]] constexpr bool has_multiple_bits_set(Bitboard bb) { return (bb & static_cast<Bitboard>(static_cast<uint64_t>(bb) - 1)) != Bitboard::Empty; }
-[[nodiscard]] constexpr bool has_one_bit_set(Bitboard bb) { return bb != Bitboard::Empty && !has_multiple_bits_set(bb); }
 [[nodiscard]] constexpr int count_set_bits(Bitboard bb) { return std::popcount(static_cast<uint64_t>(bb)); }
-[[nodiscard]] constexpr int get_lsb_index(Bitboard bb)
+[[nodiscard]] constexpr Square get_lsb_index(Bitboard bb)
 {
     assert(bb != Bitboard::Empty);
-    return std::countr_zero(static_cast<uint64_t>(bb));
+    return static_cast<Square>(std::countr_zero(static_cast<uint64_t>(bb)));
 }
 
 [[nodiscard]] constexpr Bitboard get_lsb_bb(Bitboard bb)

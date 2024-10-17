@@ -19,6 +19,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include "attacks.h"
 #include "bitboard.h"
 #include "move.h"
 #include "position.h"
@@ -106,6 +107,8 @@ void Position::set_fen(std::string fen)
 
     // Set the total ply counter
     state().totalPlyCount = std::stoi(totalPlies);
+
+    update_masks();
 }
 
 void Position::display_board() const
@@ -140,6 +143,57 @@ void Position::display_board() const
     std::cout << square_to_string(state().enPassant);
 
     std::cout << "\n";
+};
+
+constexpr void Position::update_masks()
+{
+    Colour   stm     = state().sideToMove;
+    Colour   nstm    = flip(stm);
+    Square   ksq     = get_lsb_index(board().bitboards[make_piece(stm, PieceType::King)]);
+    Bitboard stmOcc  = board().occupancies[stm];
+    Bitboard nstmOcc = board().occupancies[nstm];
+
+    // Take these bitboards by reference for convenience later on
+    Bitboard &checkers  = state().checkers;
+    Bitboard &checkMask = state().checkMask;
+    Bitboard &pinned    = state().pinned;
+
+    // Clear the masks we are about to update
+    checkers = checkMask = pinned = Bitboard::Empty;
+
+    // Non-sliding checkers
+    Bitboard pawnCheckers   = board().bitboards[make_piece(nstm, PieceType::Pawn)]   & PawnAttacks[stm][ksq];
+    Bitboard knightCheckers = board().bitboards[make_piece(nstm, PieceType::Knight)] & KnightAttacks[ksq];
+    checkers = checkMask = pawnCheckers | knightCheckers;
+
+    // Sliding checkers/pinners
+    // Note: We do not count our own pieces in the occupancy for sliding piece calculation for the time being.
+    // This is part of a clever trick so that we can count the number of friendly blockers between the potential attacker and our king.
+    Bitboard slidingAttacks = Bitboard::Empty;
+    slidingAttacks |= board().bitboards[make_piece(nstm, PieceType::Bishop)] & get_bishop_attacks(ksq, nstmOcc);
+    slidingAttacks |= board().bitboards[make_piece(nstm, PieceType::Rook)  ] & get_rook_attacks(ksq, nstmOcc);
+    slidingAttacks |= board().bitboards[make_piece(nstm, PieceType::Queen) ] & get_queen_attacks(ksq, nstmOcc);
+
+    while (slidingAttacks != Bitboard::Empty)
+    {
+        Square sq = get_lsb_index(slidingAttacks);
+        Bitboard sqBB = square_bb(sq);
+        pop_lsb(slidingAttacks);
+
+        Bitboard betweenBB   = BetweenBBs[sq][ksq];
+        Bitboard stmBlockers = betweenBB & stmOcc;
+
+        // No friendly blockers between opponent attacker and our king; we are in check
+        if (stmBlockers == Bitboard::Empty)
+        {
+            checkers |= sqBB;
+            checkMask |= sqBB | betweenBB;
+        }
+
+        // Exactly 1 friendly blocker between opponent attacker and king, which is the pinned piece
+        else if (!has_multiple_bits_set(stmBlockers))
+            pinned |= stmBlockers;
+    }
 };
 
 constexpr bool Position::is_legal(Move move) const

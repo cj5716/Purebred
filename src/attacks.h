@@ -30,6 +30,9 @@ inline Array<Bitboard, 1 << BishopBits> BishopAttacks;
 inline Array<Bitboard, 1 << RookBits> RookAttacks;
 inline Array<Bitboard, Square::NumTypes> KingAttacks;
 
+inline Array<Bitboard, Square::NumTypes, Square::NumTypes> LineBBs;
+inline Array<Bitboard, Square::NumTypes, Square::NumTypes> BetweenBBs;
+
 constexpr Array<uint64_t, Square::NumTypes> BishopMagics =
 {
     UINT64_C(0x0080810410820200), UINT64_C(0x2010520422401000), UINT64_C(0x88A01411A0081800), UINT64_C(0x1001050002610001),
@@ -111,27 +114,32 @@ inline Bitboard &get_rook_index_ref(Square sq, Bitboard occ)
     return RookAttacks[index];
 }
 
+inline Bitboard get_queen_attacks(Square sq, Bitboard occ)
+{
+    return get_bishop_attacks(sq, occ) | get_rook_attacks(sq, occ);
+}
+
 inline void init_attacks()
 {
     for (Square sq = Square::A1; sq < Square::None; ++sq)
     {
-        Bitboard sq_bb = square_bb(sq);
+        Bitboard sqBB = square_bb(sq);
 
-        PawnAttacks[Colour::White][sq] = shift_by<Direction::UpLeft  >(sq_bb) | shift_by<Direction::UpRight  >(sq_bb);
-        PawnAttacks[Colour::Black][sq] = shift_by<Direction::DownLeft>(sq_bb) | shift_by<Direction::DownRight>(sq_bb);
+        PawnAttacks[Colour::White][sq] = shift_by<Direction::UpLeft  >(sqBB) | shift_by<Direction::UpRight  >(sqBB);
+        PawnAttacks[Colour::Black][sq] = shift_by<Direction::DownLeft>(sqBB) | shift_by<Direction::DownRight>(sqBB);
 
         KnightAttacks[sq]  = Bitboard::Empty;
-        KnightAttacks[sq] |= shift_by<Direction::UpLeft   >(shift_by<Direction::Up   >(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::UpLeft   >(shift_by<Direction::Left >(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::UpRight  >(shift_by<Direction::Up   >(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::UpRight  >(shift_by<Direction::Right>(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::DownLeft >(shift_by<Direction::Down >(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::DownLeft >(shift_by<Direction::Left >(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::DownRight>(shift_by<Direction::Down >(sq_bb));
-        KnightAttacks[sq] |= shift_by<Direction::DownRight>(shift_by<Direction::Right>(sq_bb));
+        KnightAttacks[sq] |= shift_by<Direction::UpLeft   >(shift_by<Direction::Up   >(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::UpLeft   >(shift_by<Direction::Left >(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::UpRight  >(shift_by<Direction::Up   >(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::UpRight  >(shift_by<Direction::Right>(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::DownLeft >(shift_by<Direction::Down >(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::DownLeft >(shift_by<Direction::Left >(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::DownRight>(shift_by<Direction::Down >(sqBB));
+        KnightAttacks[sq] |= shift_by<Direction::DownRight>(shift_by<Direction::Right>(sqBB));
 
-        BishopMasks[sq] = ray<Direction::UpLeft>(sq_bb) | ray<Direction::UpRight>(sq_bb) | ray<Direction::DownLeft>(sq_bb) | ray<Direction::DownRight>(sq_bb);
-        RookMasks  [sq] = ray<Direction::Up    >(sq_bb) | ray<Direction::Down   >(sq_bb) | ray<Direction::Left    >(sq_bb) | ray<Direction::Right    >(sq_bb);
+        BishopMasks[sq] = ray<Direction::UpLeft>(sqBB) | ray<Direction::UpRight>(sqBB) | ray<Direction::DownLeft>(sqBB) | ray<Direction::DownRight>(sqBB);
+        RookMasks  [sq] = ray<Direction::Up    >(sqBB) | ray<Direction::Down   >(sqBB) | ray<Direction::Left    >(sqBB) | ray<Direction::Right    >(sqBB);
 
         const int bishopBits = count_set_bits(BishopMasks[sq]);
         for (int i = 0; i < (1 << bishopBits); ++i)
@@ -140,10 +148,10 @@ inline void init_attacks()
             const Bitboard occ  = pdep(BishopMasks[sq], mask);
             Bitboard &entry = get_bishop_index_ref(sq, occ);
             entry  = Bitboard::Empty;
-            entry |= ray<Direction::UpLeft   >(sq_bb, occ);
-            entry |= ray<Direction::UpRight  >(sq_bb, occ);
-            entry |= ray<Direction::DownLeft >(sq_bb, occ);
-            entry |= ray<Direction::DownRight>(sq_bb, occ);
+            entry |= ray<Direction::UpLeft   >(sqBB, occ);
+            entry |= ray<Direction::UpRight  >(sqBB, occ);
+            entry |= ray<Direction::DownLeft >(sqBB, occ);
+            entry |= ray<Direction::DownRight>(sqBB, occ);
         }
 
         const int rookBits = count_set_bits(RookMasks[sq]);
@@ -153,20 +161,46 @@ inline void init_attacks()
             const Bitboard occ  = pdep(RookMasks[sq], mask);
             Bitboard &entry = get_rook_index_ref(sq, occ);
             entry  = Bitboard::Empty;
-            entry |= ray<Direction::Up   >(sq_bb, occ);
-            entry |= ray<Direction::Down >(sq_bb, occ);
-            entry |= ray<Direction::Left >(sq_bb, occ);
-            entry |= ray<Direction::Right>(sq_bb, occ);
+            entry |= ray<Direction::Up   >(sqBB, occ);
+            entry |= ray<Direction::Down >(sqBB, occ);
+            entry |= ray<Direction::Left >(sqBB, occ);
+            entry |= ray<Direction::Right>(sqBB, occ);
         }
 
         KingAttacks[sq] = Bitboard::Empty;
-        KingAttacks[sq] |= shift_by<Direction::Up       >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::Down     >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::Left     >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::Right    >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::UpLeft   >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::UpRight  >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::DownLeft >(sq_bb);
-        KingAttacks[sq] |= shift_by<Direction::DownRight>(sq_bb);
+        KingAttacks[sq] |= shift_by<Direction::Up       >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::Down     >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::Left     >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::Right    >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::UpLeft   >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::UpRight  >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::DownLeft >(sqBB);
+        KingAttacks[sq] |= shift_by<Direction::DownRight>(sqBB);
+    }
+
+    for (Square a = Square::A1; a < Square::None; ++a)
+    {
+        for (Square b = Square::A1; b < Square::None; ++b)
+        {
+            BetweenBBs[a][b] = LineBBs[a][b] = Bitboard::Empty;
+            Bitboard sqs = square_bb(a) | square_bb(b);
+
+            // You can't have anything between a and b if they are the same
+            if (a == b) continue;
+
+            // Orthogonally aligned
+            if ((get_rook_attacks(a) & square_bb(b)) != Bitboard::Empty)
+            {
+                BetweenBBs[a][b] |= get_rook_attacks(a, sqs) & get_rook_attacks(b, sqs);
+                LineBBs[a][b] |= get_rook_attacks(a) & get_rook_attacks(b);
+            }
+
+            // Diagonally aligned
+            if ((get_bishop_attacks(a) & square_bb(b)) != Bitboard::Empty)
+            {
+                BetweenBBs[a][b] |= get_bishop_attacks(a, sqs) & get_bishop_attacks(b, sqs);
+                LineBBs[a][b] |= get_bishop_attacks(a) & get_bishop_attacks(b);
+            }
+        }
     }
 }
