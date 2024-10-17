@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+// Same as std::array but we can index by any type;
+// Convenient when we want to index by piece or square, so we don't need to static_cast manually which is ugly
 template <typename T, auto N>
 class AutoIdxArray
 {
@@ -64,6 +66,9 @@ private:
     std::array<T, static_cast<size_t>(N)> inner;
 };
 
+
+// std::array wrapper that supports more than 1 dimension as well; dimensions declared identically as C arrays
+// ie, array[1][2][3][4][5] is equivalent to Array<1, 2, 3, 4, 5>
 template <typename T, auto N>
 auto swap(AutoIdxArray<T, N> &a, AutoIdxArray<T, N> &b) { a.swap(b); }
 
@@ -82,8 +87,11 @@ struct ArrayImpl<T, N>
 template <typename T, auto... Ns>
 using Array = typename ArrayImpl<T, Ns...>::Type;
 
+// Acts identically to ArrayVec in rust;
+// Effectively a vector with fixed max size, and implemented with an array
 template<typename T, size_t Size>
-struct ArrayVec {
+struct ArrayVec
+{
 
 public:
     size_t size() const { return currSize; }
@@ -123,6 +131,7 @@ private:
     size_t currSize;
 };
 
+// String-splitting util that splits string into a vector of strings based on a given delimiter
 [[nodiscard]] inline std::vector<std::string> split_string(const std::string &str, const std::string &delim)
 {
     size_t pos_start = 0, pos_end, delim_len = delim.length();
