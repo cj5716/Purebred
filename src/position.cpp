@@ -31,11 +31,6 @@ void Position::set_fen(std::string fen)
     // Reset boards
     reset();
 
-    kingCastleSquares [Colour::White] = Square::None;
-    kingCastleSquares [Colour::Black] = Square::None;
-    queenCastleSquares[Colour::White] = Square::None;
-    queenCastleSquares[Colour::White] = Square::None;
-
     // Split the FEN into the 4 main parts
     const std::vector<std::string> tokens = split_string(fen, " ");
     const std::string boardStr  = tokens[0];
@@ -75,19 +70,40 @@ void Position::set_fen(std::string fen)
     state().sideToMove = stmStr == "w" ? Colour::White : Colour::Black;
 
     // Parse castling rights
-    // TODO: Handle DFRC and FRC using state.
-    kingCastleSquares [Colour::White] = Square::H1;
-    kingCastleSquares [Colour::Black] = Square::H8;
-    queenCastleSquares[Colour::White] = Square::A1;
-    queenCastleSquares[Colour::Black] = Square::A8;
+    castleSquares[CastlingRights::King ][Colour::White] = Square::H1;
+    castleSquares[CastlingRights::Queen][Colour::White] = Square::A1;
+    castleSquares[CastlingRights::King ][Colour::Black] = Square::H8;
+    castleSquares[CastlingRights::Queen][Colour::Black] = Square::A8;
 
     // Set the relevant rights whenever we detect them within the FEN
-    for (const char c : castleStr)
+    for (char c : castleStr)
     {
-        if (c == 'K')      board().castlingRights[Colour::White] |= CastlingRights::King;
-        else if (c == 'k') board().castlingRights[Colour::Black] |= CastlingRights::King;
-        else if (c == 'Q') board().castlingRights[Colour::White] |= CastlingRights::Queen;
-        else if (c == 'q') board().castlingRights[Colour::Black] |= CastlingRights::Queen;
+        // Convert the castling rights into DFRC form
+        if (c == 'K')      c = 'H';
+        else if (c == 'k') c = 'h';
+        else if (c == 'Q') c = 'A';
+        else if (c == 'q') c = 'a';
+
+        // Uppercase indicates white castling rights
+        if ('A' <= c && c <= 'H')
+        {
+            // Consider it a kingside or queenside castle depending on whether it is to the left or the right of the king
+            int castleFile = c - 'A';
+            CastlingRights side = castleFile < file_of(board().king_sq(Colour::White)) ? CastlingRights::Queen
+                                                                                       : CastlingRights::King;
+            castleSquares[side][Colour::White] = make_square(0, castleFile);
+            board().castlingRights[Colour::White] |= side;
+        }
+        // Lowercase indicates black castling rights
+        else if ('a' <= c && c <= 'h')
+        {
+            // Consider it a kingside or queenside castle depending on whether it is to the left or the right of the king
+            int castleFile = c - 'a';
+            CastlingRights side = castleFile < file_of(board().king_sq(Colour::Black)) ? CastlingRights::Queen
+                                                                                       : CastlingRights::King;
+            castleSquares[side][Colour::Black] = make_square(7, castleFile);
+            board().castlingRights[Colour::Black] |= side;
+        }
     }
 
     // Set the EP square if present
@@ -143,13 +159,33 @@ void Position::display_board() const
     std::cout << square_to_string(state().enPassant);
 
     std::cout << "\n";
+
+    std::cout << "     CASTLING:  ";
+
+    // White king castle
+    if ((board().castlingRights[Colour::White] & CastlingRights::King) != CastlingRights::None)
+        std::cout << char('A' + file_of(castleSquares[CastlingRights::King][Colour::White]));
+
+    // White queen castle
+    if ((board().castlingRights[Colour::White] & CastlingRights::Queen) != CastlingRights::None)
+        std::cout << char('A' + file_of(castleSquares[CastlingRights::Queen][Colour::White]));
+
+    // Black king castle
+    if ((board().castlingRights[Colour::Black] & CastlingRights::King) != CastlingRights::None)
+        std::cout << char('a' + file_of(castleSquares[CastlingRights::King][Colour::Black]));
+
+    // Black queen castle
+    if ((board().castlingRights[Colour::Black] & CastlingRights::Queen) != CastlingRights::None)
+        std::cout << char('a' + file_of(castleSquares[CastlingRights::Queen][Colour::Black]));
+
+    std::cout << "\n";
 };
 
 constexpr void Position::update_masks()
 {
     Colour   stm     = state().sideToMove;
     Colour   nstm    = flip(stm);
-    Square   ksq     = get_lsb_index(board().bitboards[make_piece(stm, PieceType::King)]);
+    Square   ksq     = board().king_sq(stm);
     Bitboard stmOcc  = board().occupancies[stm];
     Bitboard nstmOcc = board().occupancies[nstm];
 

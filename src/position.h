@@ -72,6 +72,8 @@ struct Board
         add_piece(pc, from);
         remove_piece(pc, to);
     }
+
+    constexpr Square king_sq(Colour c) const { return get_lsb_index(bitboards[make_piece(c, PieceType::King)]); }
 };
 
 struct BoardState
@@ -109,8 +111,7 @@ struct Position
     ArrayVec<Board, MaxPly>      boards;
     ArrayVec<BoardState, MaxPly> boardStates;
 
-    Array<Square, 2> kingCastleSquares;
-    Array<Square, 2> queenCastleSquares;
+    Array<Square, CastlingRights::NumTypes, Colour::NumTypes> castleSquares;
 
     void set_fen(std::string fen);
     void display_board() const;

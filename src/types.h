@@ -82,7 +82,7 @@ enum class CastlingRights : uint8_t
     None  = 0b00,
     King  = 0b01,
     Queen = 0b10,
-    All   = King | Queen
+    All   = King | Queen, NumTypes = All
 };
 
 [[nodiscard]] constexpr Square operator+(Square a, Square b) { return static_cast<Square>(static_cast<int>(a) + static_cast<int>(b)); }

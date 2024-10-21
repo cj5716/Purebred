@@ -76,45 +76,45 @@ constexpr Array<uint64_t, Square::NumTypes> RookMagics =
 inline Array<Bitboard, Square::NumTypes> BishopMasks;
 inline Array<Bitboard, Square::NumTypes> RookMasks;
 
-inline Bitboard get_bishop_attacks(Square sq)
+constexpr Bitboard get_bishop_attacks(Square sq)
 {
     return BishopMasks[sq];
 }
 
-inline Bitboard get_bishop_attacks(Square sq, Bitboard occ)
+constexpr Bitboard get_bishop_attacks(Square sq, Bitboard occ)
 {
     const Bitboard relevant =  occ & BishopMasks[sq];
     const uint64_t index    = (static_cast<uint64_t>(relevant) * BishopMagics[sq]) >> (64 - BishopBits);
     return BishopAttacks[index];
 }
 
-inline Bitboard &get_bishop_index_ref(Square sq, Bitboard occ)
+constexpr Bitboard &get_bishop_index_ref(Square sq, Bitboard occ)
 {
     const Bitboard relevant =  occ & BishopMasks[sq];
     const uint64_t index    = (static_cast<uint64_t>(relevant) * BishopMagics[sq]) >> (64 - BishopBits);
     return BishopAttacks[index];
 }
 
-inline Bitboard get_rook_attacks(Square sq)
+constexpr Bitboard get_rook_attacks(Square sq)
 {
     return RookMasks[sq];
 }
 
-inline Bitboard get_rook_attacks(Square sq, Bitboard occ)
+constexpr Bitboard get_rook_attacks(Square sq, Bitboard occ)
 {
     const Bitboard relevant =  occ & RookMasks[sq];
     const uint64_t index    = (static_cast<uint64_t>(relevant) * RookMagics[sq]) >> (64 - RookBits);
     return RookAttacks[index];
 }
 
-inline Bitboard &get_rook_index_ref(Square sq, Bitboard occ)
+constexpr Bitboard &get_rook_index_ref(Square sq, Bitboard occ)
 {
     const Bitboard relevant =  occ & RookMasks[sq];
     const uint64_t index    = (static_cast<uint64_t>(relevant) * RookMagics[sq]) >> (64 - RookBits);
     return RookAttacks[index];
 }
 
-inline Bitboard get_queen_attacks(Square sq, Bitboard occ)
+constexpr Bitboard get_queen_attacks(Square sq, Bitboard occ)
 {
     return get_bishop_attacks(sq, occ) | get_rook_attacks(sq, occ);
 }
