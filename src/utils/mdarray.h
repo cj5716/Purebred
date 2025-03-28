@@ -26,32 +26,38 @@
 namespace purebred::utils {
 
     // Credits to Stockfish for the backbone of this MDArray code, with some slight changes by me (both stylistic and functional)
-    template<typename T, usize Size, usize... Sizes>
+    template<typename T, usize kSize, usize... kSizes>
     class MDArray;
 
     namespace Detail {
-        template<typename T, usize Size, usize... Sizes>
+        template<typename T, usize kSize, usize... kSizes>
         struct MDArrayHelper {
-            using ChildType = MDArray<T, Sizes...>;
+            using ChildType = MDArray<T, kSizes...>;
         };
 
-        template<typename T, usize Size>
-        struct MDArrayHelper<T, Size> {
+        template<typename T, usize kSize>
+        struct MDArrayHelper<T, kSize> {
             using ChildType = T;
         };
     }
 
     // MDArray is a generic N-dimensional array.
-    // The template parameters (Size and Sizes) encode the dimensions of the array.
-    template<typename T, usize Size, usize... Sizes>
+    // The template parameters (kSize and kSizes) encode the dimensions of the array.
+    template<typename T, usize kSize, usize... kSizes>
     class MDArray {
-        using ChildType = typename Detail::MDArrayHelper<T, Size, Sizes...>::ChildType;
-        using ArrayType = std::array<ChildType, Size>;
+        using ChildType = typename Detail::MDArrayHelper<T, kSize, kSizes...>::ChildType;
+        using ArrayType = std::array<ChildType, kSize>;
 
     public:
-        [[nodiscard]] constexpr bool operator==(const MDArray<T, Size, Sizes...> &) const = default;
-        [[nodiscard]] constexpr MDArray &operator=(const MDArray<T, Size, Sizes...> &) = default;
-        [[nodiscard]] constexpr MDArray(const MDArray<T, Size, Sizes...> &) = default;
+
+        [[nodiscard]] constexpr MDArray() = default;
+        constexpr ~MDArray() = default;
+
+        [[nodiscard]] constexpr bool operator==(const MDArray<T, kSize, kSizes...> &) const = default;
+        [[nodiscard]] constexpr MDArray &operator=(const MDArray<T, kSize, kSizes...> &) = default;
+        [[nodiscard]] constexpr MDArray &operator=(MDArray<T, kSize, kSizes...> &&) = default;
+        [[nodiscard]] constexpr MDArray(const MDArray<T, kSize, kSizes...> &) = default;
+        [[nodiscard]] constexpr MDArray(MDArray<T, kSize, kSizes...> &&) = default;
 
         [[nodiscard]] constexpr MDArray &operator=(const ArrayType &data) {
             mData = data;
@@ -183,14 +189,16 @@ namespace purebred::utils {
 
         void fill(const T &v) {
             for (auto &ele : mData) {
-                if constexpr (sizeof...(Sizes) == 0)
+                if constexpr (sizeof...(kSizes) == 0)
                     ele = v;
                 else
                     ele.fill(v);
             }
         }
 
-        constexpr void swap(MDArray<T, Size, Sizes...> &other) { mData.swap(other.mData); }
+        constexpr void swap(MDArray<T, kSize, kSizes...> &other) {
+            mData.swap(other.mData);
+        }
 
     private:
         ArrayType mData;
