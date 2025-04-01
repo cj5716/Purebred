@@ -34,11 +34,17 @@ namespace purebred {
     constexpr usize kMaxPly = 256;
     constexpr usize kMaxMoves = 256;
 
-    constexpr i32 kScoreDraw = 0;
-    constexpr i32 kScoreMate = 32000;
-    constexpr i32 kScoreInf = 32001;
-    constexpr i32 kScoreNone = 32002;
-    constexpr i32 kScoreMateInMaxPly = kScoreMate - kMaxPly;
+    using Score = i32;
+
+    struct Scores {
+        constexpr Scores() = delete;
+
+        constexpr Score kDraw = 0;
+        constexpr Score kMate = 32000;
+        constexpr Score kInf  = 32001;
+        constexpr Score kNone = 32002;
+        constexpr Score kMateInMaxPly = kMate - kMaxPly;
+    };
 
     class Colour {
 
@@ -83,7 +89,7 @@ namespace purebred {
     };
 
     struct Colours {
-        Colours() = delete;
+        constexpr Colours() = delete;
 
         static constexpr Colour kWhite{Colour::kWhiteIdx};
         static constexpr Colour kBlack{Colour::kBlackIdx};
@@ -159,7 +165,7 @@ namespace purebred {
     };
 
     struct PieceTypes {
-        PieceTypes() = delete;
+        constexpr PieceTypes() = delete;
 
         static constexpr PieceType kPawn{PieceType::kPawnIdx};
         static constexpr PieceType kKnight{PieceType::kKnightIdx};
@@ -255,7 +261,7 @@ namespace purebred {
     };
 
     struct Pieces {
-        Pieces() = delete;
+        constexpr Pieces() = delete;
 
         static constexpr Piece kWhitePawn{Piece::kWhitePawnIdx};
         static constexpr Piece kBlackPawn{Piece::kBlackPawnIdx};
