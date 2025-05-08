@@ -16,6 +16,7 @@
  * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "core.h"
 #include "types.h"
 
 #include <iostream>
