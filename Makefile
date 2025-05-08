@@ -133,7 +133,7 @@ EXE := $(NAME)$(SUFFIX)
 
 all: $(TARGET)
 clean:
-	@rm -rf $(TMPDIR) *.o  $(DEPENDS) *.d
+	@rm -rf $(TMPDIR) *.o  $(DEPENDS) *.d $(EXE)
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(ARCHFLAGS) $(NATIVE) -MMD -MP -o $(EXE) $^ $(FLAGS)
