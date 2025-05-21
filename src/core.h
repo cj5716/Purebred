@@ -3,17 +3,17 @@
  * Copyright (C) 2025 cj5716
  *
  * Purebred is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * Purebred is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with Purebred. If not, see <https://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Purebred. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
@@ -47,6 +47,36 @@ namespace purebred {
         static constexpr Score kMateInMaxPly = kMate - kMaxPly;
     };
 
+    struct Ranks {
+        constexpr Ranks() = delete;
+
+        static constexpr u8 k1 = 0;
+        static constexpr u8 k2 = 1;
+        static constexpr u8 k3 = 2;
+        static constexpr u8 k4 = 3;
+        static constexpr u8 k5 = 4;
+        static constexpr u8 k6 = 5;
+        static constexpr u8 k7 = 6;
+        static constexpr u8 k8 = 7;
+
+        static constexpr u8 kNum = 8;
+    };
+
+    struct Files {
+        constexpr Files() = delete;
+
+        static constexpr u8 kA = 0;
+        static constexpr u8 kB = 1;
+        static constexpr u8 kC = 2;
+        static constexpr u8 kD = 3;
+        static constexpr u8 kE = 4;
+        static constexpr u8 kF = 5;
+        static constexpr u8 kG = 6;
+        static constexpr u8 kH = 7;
+
+        static constexpr u8 kNum = 8;
+    };
+
     class Colour {
 
         enum : u8 {
@@ -62,7 +92,7 @@ namespace purebred {
         [[nodiscard]] constexpr Colour() = default;
         [[nodiscard]] constexpr bool operator==(const Colour &) const = default;
 
-        constexpr Colour(auto i) {
+        explicit constexpr Colour(auto i) {
             assert(i <= kNoneIdx);
             mData = i;
         }
@@ -130,7 +160,7 @@ namespace purebred {
         [[nodiscard]] constexpr PieceType() = default;
         [[nodiscard]] constexpr bool operator==(const PieceType &) const = default;
 
-        constexpr PieceType(auto i) {
+        explicit constexpr PieceType(auto i) {
             assert(i <= kNoneIdx);
             mData = i;
         }
@@ -216,12 +246,12 @@ namespace purebred {
         [[nodiscard]] constexpr Piece() = default;
         [[nodiscard]] constexpr bool operator==(const Piece &) const = default;
 
-        constexpr Piece(auto i) {
+        explicit constexpr Piece(auto i) {
             assert(i <= kNoneIdx);
             mData = i;
         }
 
-        constexpr Piece(Colour colour, PieceType pt) {
+        explicit constexpr Piece(Colour colour, PieceType pt) {
             assert(colour != Colours::kNone);
             assert(pt != PieceTypes::kNone);
             mData = colour.raw() | (pt.raw() << 1);
@@ -259,12 +289,16 @@ namespace purebred {
             return this->type().is_minor();
         }
 
+        [[nodiscard]] constexpr usize raw() const {
+            return static_cast<usize>(mData);
+        }
+
         [[nodiscard]] constexpr operator bool() const {
             return mData != kNoneIdx;
         }
 
         [[nodiscard]] constexpr operator usize() const {
-            return static_cast<usize>(mData);
+            return this->raw();
         }
 
     private:
@@ -314,14 +348,14 @@ namespace purebred {
         [[nodiscard]] constexpr Square() = default;
         [[nodiscard]] constexpr bool operator==(const Square &) const = default;
 
-        constexpr Square(auto i) {
+        explicit constexpr Square(auto i) {
             assert(i <= kNoneIdx);
             mData = i;
         }
 
-        constexpr Square(auto r, auto f) {
-            assert(0 <= r && r < 8);
-            assert(0 <= f && f < 8);
+        explicit constexpr Square(auto r, auto f) {
+            assert(0 <= r && r < Ranks::kNum);
+            assert(0 <= f && f < Files::kNum);
             mData = (r << 3 | f);
         }
 
@@ -374,12 +408,16 @@ namespace purebred {
             return Square{mData ^ 0b000'111};
         }
 
+        [[nodiscard]] constexpr usize raw() const {
+            return static_cast<usize>(mData);
+        }
+
         [[nodiscard]] constexpr operator bool() const {
             return mData != kNoneIdx;
         }
 
         [[nodiscard]] constexpr operator usize() const {
-            return static_cast<usize>(mData);
+            return this->raw();
         }
 
     private:
@@ -391,28 +429,28 @@ namespace purebred {
     struct Squares {
         constexpr Squares() = delete;
 
-        static constexpr utils::MDArray<Square, Square::kNumTypes> all = []() {
+        static constexpr utils::MDArray<Square, Square::kNumTypes> kAll = []() {
             utils::MDArray<Square, Square::kNumTypes> inner;
             for (usize i = 0; i < Square::kNumTypes; ++i) inner[i] = Square{i};
             return inner;
         }();
 
-        static constexpr Square kA1 = all[Square::kA1Idx], kA2 = all[Square::kA2Idx], kA3 = all[Square::kA3Idx], kA4 = all[Square::kA4Idx];
-        static constexpr Square kA5 = all[Square::kA5Idx], kA6 = all[Square::kA6Idx], kA7 = all[Square::kA7Idx], kA8 = all[Square::kA8Idx];
-        static constexpr Square kB1 = all[Square::kB1Idx], kB2 = all[Square::kB2Idx], kB3 = all[Square::kB3Idx], kB4 = all[Square::kB4Idx];
-        static constexpr Square kB5 = all[Square::kB5Idx], kB6 = all[Square::kB6Idx], kB7 = all[Square::kB7Idx], kB8 = all[Square::kB8Idx];
-        static constexpr Square kC1 = all[Square::kC1Idx], kC2 = all[Square::kC2Idx], kC3 = all[Square::kC3Idx], kC4 = all[Square::kC4Idx];
-        static constexpr Square kC5 = all[Square::kC5Idx], kC6 = all[Square::kC6Idx], kC7 = all[Square::kC7Idx], kC8 = all[Square::kC8Idx];
-        static constexpr Square kD1 = all[Square::kD1Idx], kD2 = all[Square::kD2Idx], kD3 = all[Square::kD3Idx], kD4 = all[Square::kD4Idx];
-        static constexpr Square kD5 = all[Square::kD5Idx], kD6 = all[Square::kD6Idx], kD7 = all[Square::kD7Idx], kD8 = all[Square::kD8Idx];
-        static constexpr Square kE1 = all[Square::kE1Idx], kE2 = all[Square::kE2Idx], kE3 = all[Square::kE3Idx], kE4 = all[Square::kE4Idx];
-        static constexpr Square kE5 = all[Square::kE5Idx], kE6 = all[Square::kE6Idx], kE7 = all[Square::kE7Idx], kE8 = all[Square::kE8Idx];
-        static constexpr Square kF1 = all[Square::kF1Idx], kF2 = all[Square::kF2Idx], kF3 = all[Square::kF3Idx], kF4 = all[Square::kF4Idx];
-        static constexpr Square kF5 = all[Square::kF5Idx], kF6 = all[Square::kF6Idx], kF7 = all[Square::kF7Idx], kF8 = all[Square::kF8Idx];
-        static constexpr Square kG1 = all[Square::kG1Idx], kG2 = all[Square::kG2Idx], kG3 = all[Square::kG3Idx], kG4 = all[Square::kG4Idx];
-        static constexpr Square kG5 = all[Square::kG5Idx], kG6 = all[Square::kG6Idx], kG7 = all[Square::kG7Idx], kG8 = all[Square::kG8Idx];
-        static constexpr Square kH1 = all[Square::kH1Idx], kH2 = all[Square::kH2Idx], kH3 = all[Square::kH3Idx], kH4 = all[Square::kH4Idx];
-        static constexpr Square kH5 = all[Square::kH5Idx], kH6 = all[Square::kH6Idx], kH7 = all[Square::kH7Idx], kH8 = all[Square::kH8Idx];
+        static constexpr Square kA1 = kAll[Square::kA1Idx], kA2 = kAll[Square::kA2Idx], kA3 = kAll[Square::kA3Idx], kA4 = kAll[Square::kA4Idx];
+        static constexpr Square kA5 = kAll[Square::kA5Idx], kA6 = kAll[Square::kA6Idx], kA7 = kAll[Square::kA7Idx], kA8 = kAll[Square::kA8Idx];
+        static constexpr Square kB1 = kAll[Square::kB1Idx], kB2 = kAll[Square::kB2Idx], kB3 = kAll[Square::kB3Idx], kB4 = kAll[Square::kB4Idx];
+        static constexpr Square kB5 = kAll[Square::kB5Idx], kB6 = kAll[Square::kB6Idx], kB7 = kAll[Square::kB7Idx], kB8 = kAll[Square::kB8Idx];
+        static constexpr Square kC1 = kAll[Square::kC1Idx], kC2 = kAll[Square::kC2Idx], kC3 = kAll[Square::kC3Idx], kC4 = kAll[Square::kC4Idx];
+        static constexpr Square kC5 = kAll[Square::kC5Idx], kC6 = kAll[Square::kC6Idx], kC7 = kAll[Square::kC7Idx], kC8 = kAll[Square::kC8Idx];
+        static constexpr Square kD1 = kAll[Square::kD1Idx], kD2 = kAll[Square::kD2Idx], kD3 = kAll[Square::kD3Idx], kD4 = kAll[Square::kD4Idx];
+        static constexpr Square kD5 = kAll[Square::kD5Idx], kD6 = kAll[Square::kD6Idx], kD7 = kAll[Square::kD7Idx], kD8 = kAll[Square::kD8Idx];
+        static constexpr Square kE1 = kAll[Square::kE1Idx], kE2 = kAll[Square::kE2Idx], kE3 = kAll[Square::kE3Idx], kE4 = kAll[Square::kE4Idx];
+        static constexpr Square kE5 = kAll[Square::kE5Idx], kE6 = kAll[Square::kE6Idx], kE7 = kAll[Square::kE7Idx], kE8 = kAll[Square::kE8Idx];
+        static constexpr Square kF1 = kAll[Square::kF1Idx], kF2 = kAll[Square::kF2Idx], kF3 = kAll[Square::kF3Idx], kF4 = kAll[Square::kF4Idx];
+        static constexpr Square kF5 = kAll[Square::kF5Idx], kF6 = kAll[Square::kF6Idx], kF7 = kAll[Square::kF7Idx], kF8 = kAll[Square::kF8Idx];
+        static constexpr Square kG1 = kAll[Square::kG1Idx], kG2 = kAll[Square::kG2Idx], kG3 = kAll[Square::kG3Idx], kG4 = kAll[Square::kG4Idx];
+        static constexpr Square kG5 = kAll[Square::kG5Idx], kG6 = kAll[Square::kG6Idx], kG7 = kAll[Square::kG7Idx], kG8 = kAll[Square::kG8Idx];
+        static constexpr Square kH1 = kAll[Square::kH1Idx], kH2 = kAll[Square::kH2Idx], kH3 = kAll[Square::kH3Idx], kH4 = kAll[Square::kH4Idx];
+        static constexpr Square kH5 = kAll[Square::kH5Idx], kH6 = kAll[Square::kH6Idx], kH7 = kAll[Square::kH7Idx], kH8 = kAll[Square::kH8Idx];
         static constexpr Square kNone = Square{Square::kNoneIdx};
     };
 }

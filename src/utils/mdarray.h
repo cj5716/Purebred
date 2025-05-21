@@ -67,11 +67,11 @@ namespace purebred::utils {
             mData = data;
         }
 
-        [[nodiscard]] constexpr MDArray &operator=(std::initializer_list<ChildType> data) {
+        [[nodiscard]] constexpr MDArray &operator=(const std::initializer_list<ChildType> data) {
             std::copy(data.begin(), data.end(), mData.begin());
         }
 
-        [[nodiscard]] constexpr MDArray(std::initializer_list<ChildType> data) {
+        [[nodiscard]] constexpr MDArray(const std::initializer_list<ChildType> data) {
             std::copy(data.begin(), data.end(), mData.begin());
         }
 
