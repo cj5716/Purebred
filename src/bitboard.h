@@ -1,5 +1,5 @@
 /*
-* Purebred, a UCI chess engine
+ * Purebred, a UCI chess engine
  * Copyright (C) 2025 cj5716
  *
  * Purebred is free software: you can redistribute it and/or modify

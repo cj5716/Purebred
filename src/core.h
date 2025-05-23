@@ -113,8 +113,8 @@ namespace purebred {
             return Colour{mData ^ 1};
         }
 
-        [[nodiscard]] constexpr usize raw() const {
-            return static_cast<usize>(mData);
+        [[nodiscard]] constexpr u8 raw() const {
+            return mData;
         }
 
         [[nodiscard]] constexpr operator bool() const {
@@ -189,8 +189,8 @@ namespace purebred {
             return mData >= kKnightIdx && mData <= kQueenIdx;
         }
 
-        [[nodiscard]] constexpr usize raw() const {
-            return static_cast<usize>(mData);
+        [[nodiscard]] constexpr u8 raw() const {
+            return static_cast<u8>(mData);
         }
 
         [[nodiscard]] constexpr operator bool() const {
@@ -289,8 +289,8 @@ namespace purebred {
             return this->type().is_minor();
         }
 
-        [[nodiscard]] constexpr usize raw() const {
-            return static_cast<usize>(mData);
+        [[nodiscard]] constexpr u8 raw() const {
+            return mData;
         }
 
         [[nodiscard]] constexpr operator bool() const {
@@ -408,8 +408,8 @@ namespace purebred {
             return Square{mData ^ 0b000'111};
         }
 
-        [[nodiscard]] constexpr usize raw() const {
-            return static_cast<usize>(mData);
+        [[nodiscard]] constexpr u8 raw() const {
+            return mData;
         }
 
         [[nodiscard]] constexpr operator bool() const {
