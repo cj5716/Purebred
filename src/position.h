@@ -223,19 +223,53 @@ namespace purebred {
             this->mPieceTypeBBs[pc.type()].toggle_bit(sq);
         }
 
-        constexpr void flip_stm();
-        constexpr void set_en_passant_sq(const Square sq);
-        constexpr void set_castling_squares(const auto &newCastlingSquares);
+        constexpr void flip_stm() {
+            this->mMainKey ^= zobrist::stm_key();
+            this->mStm = this->mStm.flip();
+        }
+
+        constexpr void set_en_passant_sq(const Square sq) {
+            this->mMainKey ^= zobrist::en_passant_key(this->mEnPassantSq) ^ zobrist::en_passant_key(sq);
+            this->mEnPassantSq = sq;
+        }
+
+        constexpr void set_castling_squares(const auto &newCastlingSquares) {
+            this->mMainKey ^= zobrist::castling_key(this->mCastlingSquares) ^ zobrist::castling_key(newCastlingSquares);
+            this->mCastlingSquares = newCastlingSquares;
+        }
 
         constexpr void add_piece(const Piece pc, const Square sq);
         constexpr void remove_piece(const Piece pc, const Square sq);
         constexpr void move_piece(const Piece pc, const Square from, const Square to);
 
         template <bool kWhite>
-        constexpr void calc_pins();
-        constexpr void calc_checkers();
-        constexpr void calc_masks();
+        constexpr void update_pins() {
+            constexpr Colour us = kWhite ? Colours::kWhite : Colours::kBlack;
+            constexpr Colour them = us.flip();
+            const Square ksq = this->king_sq(us);
 
+            this->mKingBlockerBBs[us] = this->mPinnerBBs[them] = Bitboards::kEmpty;
+
+            const Bitboard attackers = this->slider_attackers_to(them, ksq, Bitboards::kEmpty);
+            for (Square sq : attackers) {
+                const Bitboard blockers = attacks::betweenBB[sq][ksq];
+                if (!blockers.one_bit_set()) continue;
+                this->mKingBlockerBBs[us] |= blockers;
+                if (blockers & this->occupancy_bb(us)) {
+                    this->mPinnerBBs[them] |= Bitboard{sq};
+                }
+            }
+        }
+
+        constexpr void update_checkers() {
+            this->mCheckers = this->attackers_to(this->mStm.flip(), this->king_sq(this->mStm), this->occupancy_bb());
+        }
+
+        constexpr void update_masks() {
+            this->update_pins<true>();
+            this->update_pins<false>();
+            this->update_checkers();
+        }
     };
 }
 

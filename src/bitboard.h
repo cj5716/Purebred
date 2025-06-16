@@ -49,6 +49,7 @@ namespace purebred {
     class Bitboard {
     public:
         [[nodiscard]] constexpr Bitboard() = default;
+        [[nodiscard]] constexpr Bitboard(const Bitboard &) = default;
         [[nodiscard]] constexpr bool operator==(const Bitboard &) const = default;
 
         explicit constexpr Bitboard(u64 bb) {
@@ -169,11 +170,11 @@ namespace purebred {
         template <Direction kDir>
         [[nodiscard]] constexpr Bitboard ray(Bitboard occ = Bitboard{}) const;
 
-    private:
-        u64 mData;
-
         [[nodiscard]] constexpr Biterator begin() const;
         [[nodiscard]] constexpr Biterator end() const;
+
+    private:
+        u64 mData;
 
         friend class Biterator;
     };
