@@ -16,19 +16,28 @@
  * along with Purebred. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "attacks.h"
-#include "core.h"
-#include "types.h"
-#include "zobrist.h"
+#pragma once
 
-#include <iostream>
+#include "../types.h"
 
-using namespace purebred;
+namespace purebred::utils {
 
-i32 main(i32 argc, char* argv[]) {
+    // Implements the splitmix64 PRNG by Sebastiano Vigna.
+    class RNG {
+    public:
+        constexpr RNG() = default;
+        constexpr RNG(u64 seed) {
+            this->mState = seed;
+        }
 
-    attacks::init();
-    zobrist::init();
+        [[nodiscard]] constexpr u64 next() {
+            u64 z = (this->mState += U64C(0x9E3779B97F4A7C15));
+            z = (z ^ (z >> 30)) * U64C(0xBF58476D1CE4E5B9);
+            z = (z ^ (z >> 27)) * U64C(0x94D049BB133111EB);
+            return z ^ (z >> 31);
+        }
 
-    std::cout << kName << " by " << kAuthor << std::endl;
+    private:
+        u64 mState{};
+    };
 }

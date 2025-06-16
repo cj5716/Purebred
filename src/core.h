@@ -60,6 +60,9 @@ namespace purebred {
         static constexpr u8 k8 = 7;
 
         static constexpr u8 kNum = 8;
+        static constexpr utils::MDArray<u8, kNum> kAll = {
+            k1, k2, k3, k4, k5, k6, k7, k8
+        };
     };
 
     struct Files {
@@ -75,6 +78,9 @@ namespace purebred {
         static constexpr u8 kH = 7;
 
         static constexpr u8 kNum = 8;
+        static constexpr utils::MDArray<u8, kNum> kAll = {
+            kA, kB, kC, kD, kE, kF, kG, kH
+        };
     };
 
     class Colour {
@@ -139,6 +145,10 @@ namespace purebred {
         static constexpr Colour kWhite{Colour::kWhiteIdx};
         static constexpr Colour kBlack{Colour::kBlackIdx};
         static constexpr Colour kNone{Colour::kNoneIdx};
+
+        static constexpr utils::MDArray<Colour, Colour::kNumTypes> kAll = {
+            kWhite, kBlack
+        };
     };
 
     class PieceType {
@@ -219,6 +229,10 @@ namespace purebred {
         static constexpr PieceType kQueen{PieceType::kQueenIdx};
         static constexpr PieceType kKing{PieceType::kKingIdx};
         static constexpr PieceType kNone{PieceType::kNoneIdx};
+
+        static constexpr utils::MDArray<PieceType, PieceType::kNumTypes> kAll = {
+            kPawn, kKnight, kBishop, kRook, kQueen, kKing
+        };
     };
 
     class Piece {
@@ -325,6 +339,11 @@ namespace purebred {
         static constexpr Piece kWhiteKing{Piece::kWhiteKingIdx};
         static constexpr Piece kBlackKing{Piece::kBlackKingIdx};
         static constexpr Piece kNone{Piece::kNoneIdx};
+
+        static constexpr utils::MDArray<Piece, Piece::kNumTypes> kAll = {
+            kWhitePawn, kBlackPawn, kWhiteKnight, kBlackKnight, kWhiteBishop, kBlackBishop,
+            kWhiteRook, kBlackRook, kWhiteQueen , kBlackQueen , kWhiteKing  , kBlackKing
+        };
     };
 
     class Square {
@@ -453,4 +472,10 @@ namespace purebred {
         static constexpr Square kH5 = kAll[Square::kH5Idx], kH6 = kAll[Square::kH6Idx], kH7 = kAll[Square::kH7Idx], kH8 = kAll[Square::kH8Idx];
         static constexpr Square kNone = Square{Square::kNoneIdx};
     };
+
+    typedef enum : u8 {
+        kQueen,
+        kKing,
+        kNumTypes
+    } CastlingSide;
 }

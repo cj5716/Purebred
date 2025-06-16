@@ -87,19 +87,20 @@ namespace purebred {
             return PieceType{(mData >> kPromoShift) + PieceTypes::kKnight.raw()};
         }
 
-        [[nodiscard]] constexpr bool castle_is_kingside() const {
+        [[nodiscard]] constexpr CastlingSide castling_side() const {
             assert(this->type() == Type::kCastling);
-            return this->to().raw() > this->from().raw();
+            return this->to().raw() > this->from().raw() ? CastlingSide::kKing
+                                                         : CastlingSide::kQueen;
         }
 
         [[nodiscard]] constexpr Square castle_king_to() const {
             assert(this->type() == Type::kCastling);
-            return Square{this->from().rank(), this->castle_is_kingside() ? Files::kG : Files::kC};
+            return Square{this->from().rank(), this->castling_side() == CastlingSide::kKing ? Files::kG : Files::kC};
         }
 
         [[nodiscard]] constexpr Square castle_rook_to() const {
             assert(this->type() == Type::kCastling);
-            return Square{this->from().rank(), this->castle_is_kingside() ? Files::kF : Files::kD};
+            return Square{this->from().rank(), this->castling_side() == CastlingSide::kKing ? Files::kF : Files::kD};
         }
 
         template <bool kChess960>

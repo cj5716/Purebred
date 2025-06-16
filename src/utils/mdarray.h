@@ -187,7 +187,7 @@ namespace purebred::utils {
             return mData.max_size();
         }
 
-        void fill(const T &v) {
+        constexpr void fill(const T &v) {
             for (auto &ele : mData) {
                 if constexpr (sizeof...(kSizes) == 0)
                     ele = v;

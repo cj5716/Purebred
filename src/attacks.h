@@ -26,25 +26,25 @@
 // We pre-initialise all attack lookups at startup to reduce computation during searching.
 namespace purebred::attacks {
 
-    utils::MDArray<Bitboard, Colour::kNumTypes, Square::kNumTypes> pawnAttacks;
-    utils::MDArray<Bitboard, Square::kNumTypes> knightAttacks;
-    utils::MDArray<Bitboard, Square::kNumTypes> bishopMasks;
-    utils::MDArray<Bitboard, Square::kNumTypes> rookMasks;
-    utils::MDArray<Bitboard, Square::kNumTypes> kingAttacks;
+    inline utils::MDArray<Bitboard, Colour::kNumTypes, Square::kNumTypes> pawnAttacks;
+    inline utils::MDArray<Bitboard, Square::kNumTypes> knightAttacks;
+    inline utils::MDArray<Bitboard, Square::kNumTypes> bishopMasks;
+    inline utils::MDArray<Bitboard, Square::kNumTypes> rookMasks;
+    inline utils::MDArray<Bitboard, Square::kNumTypes> kingAttacks;
 
     // The number of possible arrangements of blockers for each piece type.
     constexpr i32 kBishopRelevantBits = 9;
     constexpr i32 kRookRelevantBits = 12;
-    utils::MDArray<Bitboard, 1 << kBishopRelevantBits> bishopAttacks;
-    utils::MDArray<Bitboard, 1 << kRookRelevantBits> rookAttacks;
+    inline utils::MDArray<Bitboard, 1 << kBishopRelevantBits> bishopAttacks;
+    inline utils::MDArray<Bitboard, 1 << kRookRelevantBits> rookAttacks;
 
-    utils::MDArray<Bitboard, Square::kNumTypes, Square::kNumTypes> lineBB;
-    utils::MDArray<Bitboard, Square::kNumTypes, Square::kNumTypes> betweenBB;
+    inline utils::MDArray<Bitboard, Square::kNumTypes, Square::kNumTypes> lineBB;
+    inline utils::MDArray<Bitboard, Square::kNumTypes, Square::kNumTypes> betweenBB;
 
     // These 2 arrays of "magic" numbers actually play a big role in fast attack generation;
     // They act as "hashers" to perfectly map all possible arrangements of blockers to the corresponding attack masks.
     // Read more: https://analog-hors.github.io/site/magic-bitboards/
-    utils::MDArray<u64, Square::kNumTypes> bishopMagics = {
+    constexpr utils::MDArray<u64, Square::kNumTypes> bishopMagics = {
         U64C(0x0080810410820200), U64C(0x2010520422401000), U64C(0x88A01411A0081800), U64C(0x1001050002610001),
         U64C(0x9000908280000000), U64C(0x20080442A0000001), U64C(0x0221A80045080800), U64C(0x000060200A404000),
         U64C(0x0020100894408080), U64C(0x0800084021404602), U64C(0x0040804100298014), U64C(0x5080201060400011),
@@ -63,7 +63,7 @@ namespace purebred::attacks {
         U64C(0x413010050C100405), U64C(0x0004248204042020), U64C(0x0044004408280110), U64C(0x6010220080600502)
     };
 
-    utils::MDArray<u64, Square::kNumTypes> rookMagics = {
+    constexpr utils::MDArray<u64, Square::kNumTypes> rookMagics = {
         U64C(0x8A80104000800020), U64C(0x0084020100804000), U64C(0x00800A1000048020), U64C(0xC4100020B1000200),
         U64C(0x9400440002080420), U64C(0x0A8004002A801200), U64C(0x0840140C80400100), U64C(0x010000820C412300),
         U64C(0x0910800212400820), U64C(0x0008050190002800), U64C(0x0001080800102000), U64C(0x0041080080201001),
