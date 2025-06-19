@@ -22,6 +22,8 @@
 #include "types.h"
 #include "utils/mdarray.h"
 
+#include <concepts>
+
 namespace purebred {
 
     enum class Direction : i32 {
@@ -52,12 +54,12 @@ namespace purebred {
         [[nodiscard]] constexpr Bitboard(const Bitboard &) = default;
         [[nodiscard]] constexpr bool operator==(const Bitboard &) const = default;
 
-        explicit constexpr Bitboard(u64 bb) {
+        explicit constexpr Bitboard(const u64 bb) {
             mData = bb;
         }
 
-        explicit constexpr Bitboard(Square sq) {
-            mData = static_cast<u64>(1) << sq.raw();
+        explicit constexpr Bitboard(const Square sq) {
+            mData = U64C(1) << sq.raw();
         }
 
         [[nodiscard]] constexpr u64 raw() const {
@@ -68,27 +70,27 @@ namespace purebred {
             return this->raw();
         }
 
-        [[nodiscard]] constexpr Bitboard operator&(u64 other) const {
+        [[nodiscard]] constexpr Bitboard operator&(const u64 other) const {
             return Bitboard{mData & other};
         }
 
-        [[nodiscard]] constexpr Bitboard operator|(u64 other) const {
+        [[nodiscard]] constexpr Bitboard operator|(const u64 other) const {
             return Bitboard{mData | other};
         }
 
-        [[nodiscard]] constexpr Bitboard operator^(u64 other) const {
+        [[nodiscard]] constexpr Bitboard operator^(const u64 other) const {
             return Bitboard{mData ^ other};
         }
 
-        constexpr Bitboard &operator&=(u64 other) {
+        constexpr Bitboard &operator&=(const u64 other) {
             return *this = *this & other;
         }
 
-        constexpr Bitboard &operator|=(u64 other) {
+        constexpr Bitboard &operator|=(const u64 other) {
             return *this = *this | other;
         }
 
-        constexpr Bitboard &operator^=(u64 other) {
+        constexpr Bitboard &operator^=(const u64 other) {
             return *this = *this ^ other;
         }
 
@@ -96,38 +98,42 @@ namespace purebred {
             return Bitboard{~mData};
         }
 
-        [[nodiscard]] constexpr Bitboard operator<<(i32 shift) const {
+        [[nodiscard]] constexpr Bitboard operator<<(const i32 shift) const {
             assert(shift >= 0);
             return Bitboard{mData << shift};
         }
 
-        [[nodiscard]] constexpr Bitboard operator>>(i32 shift) const {
+        [[nodiscard]] constexpr Bitboard operator>>(const i32 shift) const {
             assert(shift >= 0);
             return Bitboard{mData >> shift};
         }
 
-        constexpr Bitboard &operator<<=(i32 shift) {
+        constexpr Bitboard &operator<<=(const i32 shift) {
             return *this = *this << shift;
         }
 
-        constexpr Bitboard &operator>>=(i32 shift) {
+        constexpr Bitboard &operator>>=(const i32 shift) {
             return *this = *this >> shift;
         }
 
-        [[nodiscard]] constexpr bool get_bit(Square sq) {
+        [[nodiscard]] constexpr bool get_bit(const Square sq) {
             return mData & Bitboard{sq};
         }
 
-        constexpr Bitboard &set_bit(Square sq) {
+        constexpr Bitboard &set_bit(const Square sq) {
             return *this |= Bitboard{sq};
         }
 
-        constexpr Bitboard &unset_bit(Square sq) {
+        constexpr Bitboard &unset_bit(const Square sq) {
             return *this &= ~Bitboard{sq};
         }
 
-        constexpr Bitboard &toggle_bit(Square sq) {
+        constexpr Bitboard &toggle_bit(const Square sq) {
             return *this ^= Bitboard{sq};
+        }
+
+        constexpr Bitboard &toggle_bits(const std::same_as<Square> auto... sqs) {
+            return (this->toggle_bit(sqs), ...);
         }
 
         constexpr Bitboard &reset() {
@@ -160,7 +166,7 @@ namespace purebred {
         }
 
         // Use the Carry-Rippler trick to enumerate all subsets of a bitboard.
-        [[nodiscard]] constexpr Bitboard next_subset(Bitboard curr) const {
+        [[nodiscard]] constexpr Bitboard next_subset(const Bitboard curr) const {
             return Bitboard{(curr - mData) & mData};
         }
 
@@ -168,7 +174,7 @@ namespace purebred {
         [[nodiscard]] constexpr Bitboard shift() const;
 
         template <Direction kDir>
-        [[nodiscard]] constexpr Bitboard ray(Bitboard occ = Bitboard{}) const;
+        [[nodiscard]] constexpr Bitboard ray(const Bitboard occ = Bitboard{}) const;
 
         [[nodiscard]] constexpr Biterator begin() const;
         [[nodiscard]] constexpr Biterator end() const;
@@ -246,7 +252,7 @@ namespace purebred {
 
     // Shift a bitboard repeatedly, keeping in mind occupancy (ie, we cannot pass through pieces)
     template<Direction kDir>
-    constexpr Bitboard Bitboard::ray(Bitboard occ) const {
+    constexpr Bitboard Bitboard::ray(const Bitboard occ) const {
 
         Bitboard res = this->shift<kDir>();
 
@@ -277,7 +283,7 @@ namespace purebred {
     private:
         Bitboard mBB;
 
-        explicit constexpr Biterator(Bitboard bb) {
+        explicit constexpr Biterator(const Bitboard bb) {
             mBB = bb;
         }
 

@@ -27,13 +27,14 @@
 #include "zobrist.h"
 
 #include <concepts>
+#include <string>
 
 namespace purebred {
+
     class Position {
     public:
         constexpr Position() {
-            this->mMainKey = this->mPawnKey = 0;
-            this->mNonPawnKeys.fill(0);
+            this->mKeys = Keys{};
 
             this->mOccBBs.fill(Bitboards::kEmpty);
             this->mPieceTypeBBs.fill(Bitboards::kEmpty);
@@ -54,11 +55,15 @@ namespace purebred {
         [[nodiscard]] constexpr bool operator==(const Position &) const = default;
 
         [[nodiscard]] constexpr u64 key() const {
-            return this->mMainKey;
+            return this->mKeys.mMain;
         }
 
         [[nodiscard]] constexpr u64 pawn_key() const {
-            return this->mPawnKey;
+            return this->mKeys.mPawn;
+        }
+
+        [[nodiscard]] constexpr u64 nonpawn_key(const Colour c) const {
+            return this->mKeys.mNonPawn[c];
         }
 
         [[nodiscard]] constexpr Bitboard occupancy_bb(const Colour c) const {
@@ -121,12 +126,12 @@ namespace purebred {
             return this->mGamePly;
         }
 
-        [[nodiscard]] constexpr Square en_passant_sq() const {
+        [[nodiscard]] constexpr Square en_passant_square() const {
             return this->mEnPassantSq;
         }
 
         [[nodiscard]] constexpr Bitboard non_kp_bb() const {
-            return ~piece_types_bb(PieceTypes::kPawn, PieceTypes::kKing);
+            return ~this->piece_types_bb(PieceTypes::kPawn, PieceTypes::kKing);
         }
 
         [[nodiscard]] constexpr bool has_non_kp() const {
@@ -189,12 +194,48 @@ namespace purebred {
             return p | rest;
         }
 
-        [[nodiscard]] static constexpr Position from_fen(std::string &fen);
+        [[nodiscard]] static Position from_fen(std::string &fen);
+        [[nodiscard]] std::string to_pretty_str() const;
 
     private:
-        u64 mMainKey;
-        u64 mPawnKey;
-        utils::MDArray<u64, Colour::kNumTypes> mNonPawnKeys;
+
+        struct Keys {
+            u64 mMain{};
+            u64 mPawn{};
+            utils::MDArray<u64, Colour::kNumTypes> mNonPawn{};
+
+            constexpr void toggle_piece(const Piece pc, const Square sq) {
+                const u64 delta = zobrist::key(pc, sq);
+                this->mMain ^= delta;
+                if (pc.type() == PieceTypes::kPawn) this->mPawn ^= delta;
+                else this->mNonPawn[pc.colour()] ^= delta;
+            }
+
+            constexpr void move_piece(const Piece pc, const Square from, const Square to) {
+                const u64 delta = zobrist::key(pc, from) ^ zobrist::key(pc, to);
+                this->mMain ^= delta;
+                if (pc.type() == PieceTypes::kPawn) this->mPawn ^= delta;
+                else this->mNonPawn[pc.colour()] ^= delta;
+            }
+
+            constexpr void toggle_en_passant(const Square sq) {
+                this->mMain ^= zobrist::en_passant_key(sq);
+            }
+
+            constexpr void toggle_castling_rights(const auto &castlingRights) {
+                this->mMain ^= zobrist::castling_key(castlingRights);
+            }
+
+            constexpr void set_stm(const Colour stm) {
+                if (stm == Colours::kWhite) this->mMain ^= zobrist::stm_key();
+            }
+
+            constexpr void toggle_stm() {
+                this->mMain ^= zobrist::stm_key();
+            }
+        };
+
+        Keys mKeys;
 
         utils::MDArray<Bitboard, Colour::kNumTypes> mOccBBs;
         utils::MDArray<Bitboard, Piece::kNumTypes> mPieceTypeBBs;
@@ -211,31 +252,33 @@ namespace purebred {
         utils::MDArray<Square, Colour::kNumTypes, CastlingSide::kNumTypes> mCastlingSquares;
         Square mEnPassantSq;
 
-        constexpr void toggle_keys(const Piece pc, const Square sq) {
-            const u64 delta = zobrist::key(pc, sq);
-            this->mMainKey ^= delta;
-            if (pc.type() == PieceTypes::kPawn) this->mPawnKey ^= delta;
-            else this->mNonPawnKeys[pc.colour()] ^= delta;
+        constexpr void toggle_bbs(const Piece pc, const std::same_as<Square> auto... sqs) {
+            this->mOccBBs[pc.colour()].toggle_bits(sqs...);
+            this->mPieceTypeBBs[pc.type()].toggle_bits(sqs...);
         }
 
-        constexpr void toggle_bbs(const Piece pc, const Square sq) {
-            this->mOccBBs[pc.colour()].toggle_bit(sq);
-            this->mPieceTypeBBs[pc.type()].toggle_bit(sq);
+        constexpr void set_stm(const Colour c) {
+            this->mStm = c;
+            this->mKeys.set_stm(c);
         }
 
         constexpr void flip_stm() {
-            this->mMainKey ^= zobrist::stm_key();
             this->mStm = this->mStm.flip();
+            this->mKeys.toggle_stm();
         }
 
-        constexpr void set_en_passant_sq(const Square sq) {
-            this->mMainKey ^= zobrist::en_passant_key(this->mEnPassantSq) ^ zobrist::en_passant_key(sq);
+        constexpr void set_en_passant_square(const Square sq) {
+            this->mKeys.toggle_en_passant(this->mEnPassantSq);
+            this->mKeys.toggle_en_passant(sq);
             this->mEnPassantSq = sq;
         }
 
-        constexpr void set_castling_squares(const auto &newCastlingSquares) {
-            this->mMainKey ^= zobrist::castling_key(this->mCastlingSquares) ^ zobrist::castling_key(newCastlingSquares);
-            this->mCastlingSquares = newCastlingSquares;
+        constexpr void set_castling_square(const Colour c, const CastlingSide side, const Square sq) {
+            this->mCastlingSquares[c][side] = sq;
+        }
+
+        constexpr void unset_castling_square(const Colour c, const CastlingSide side) {
+            this->mCastlingSquares[c][side] = Squares::kNone;
         }
 
         constexpr void add_piece(const Piece pc, const Square sq);

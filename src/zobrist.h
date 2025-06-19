@@ -50,7 +50,7 @@ namespace purebred::zobrist {
         }
     }
 
-    constexpr u64 key(Piece pc, Square sq) {
+    constexpr u64 key(const Piece pc, const Square sq) {
         return keys[pc.raw() * Square::kNumTypes + sq.raw()];
     }
 
@@ -58,11 +58,11 @@ namespace purebred::zobrist {
         return keys[stmOffset];
     }
 
-    constexpr u64 en_passant_key(Square sq) {
+    constexpr u64 en_passant_key(const Square sq) {
         return sq ? keys[enPassantOffset + sq.file()] : 0;
     }
 
-    constexpr u64 castling_key(auto &castlingRights) {
+    constexpr u64 castling_key(const auto &castlingRights) {
         return keys[
                castlingOffset
             +  static_cast<bool>(castlingRights[Colours::kWhite][CastlingSide::kQueen])
