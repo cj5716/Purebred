@@ -16,20 +16,43 @@
  * along with Purebred. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "attacks.h"
-#include "core.h"
-#include "engine.h"
+#pragma once
+
+#include "position.h"
 #include "types.h"
-#include "uci.h"
-#include "zobrist.h"
 
-using namespace purebred;
+namespace purebred {
 
-i32 main(i32 argc, char* argv[]) {
+    template <typename Communicator>
+    class Engine {
+    public:
 
-    attacks::init();
-    zobrist::init();
+        Engine() {
+            Communicator::report_init();
+        }
 
-    Engine<UCICommunicator> engine;
-    engine.loop();
+        inline void set_fen(std::string &fen) {
+            mPos = Position::from_fen(fen);
+        }
+
+        inline const Position get_root_pos() const {
+            return mPos;
+        }
+
+        inline void quit() {
+            mQuit = true;
+        }
+
+        inline void loop() {
+            /*
+            while (!mQuit) {
+                Communicator::parse_command(this->set_fen, this->get_root_pos, this->quit);
+            }
+            */
+        }
+
+    private:
+        Position mPos;
+        bool mQuit = false;
+    };
 }

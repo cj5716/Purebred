@@ -152,5 +152,4 @@ namespace purebred {
 
         return res;
     }
-
 }
