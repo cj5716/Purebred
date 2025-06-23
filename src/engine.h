@@ -28,20 +28,24 @@ namespace purebred {
     public:
 
         constexpr Engine() = default;
+        constexpr Engine(i32 argc, char **argv) {
+            this->mCommunicator = Communicator{argc, argv};
+        }
 
         inline void set_fen(std::string &fen) {
-            mPos = Position::from_fen(fen);
+            this->mPos = Position::from_fen(fen);
         }
 
         inline const Position get_root_pos() const {
-            return mPos;
+            return this->mPos;
         }
 
         inline void run() {
-            Communicator::run(*this);
+            mCommunicator.run(*this);
         }
 
     private:
         Position mPos;
+        Communicator mCommunicator{};
     };
 }

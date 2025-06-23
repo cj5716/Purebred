@@ -25,11 +25,11 @@
 
 using namespace purebred;
 
-i32 main(i32 argc, char* argv[]) {
+i32 main(i32 argc, char **argv) {
 
     attacks::init();
     zobrist::init();
 
-    Engine<UCICommunicator> engine;
+    Engine<UCICommunicator> engine{argc, argv};
     engine.run();
 }

@@ -28,19 +28,22 @@
 namespace purebred {
     class UCICommunicator {
     public:
-
-        static void report_info_string() {
+        constexpr UCICommunicator() = default;
+        constexpr UCICommunicator(i32 argc, char **argv) {
+            this->mArgc = argc;
+            this->mArgv = argv;
         }
 
-        static void report_best_move() {
+        inline void report_info_string() {
         }
 
-        static void run(auto &engine) {
+        inline void report_best_move() {
+        }
+
+        inline void run(auto &engine) {
             std::cout << kName << " by " << kAuthor << std::endl;
             while (true) {
-                std::string line;
-                std::getline(std::cin, line);
-                std::istringstream iss(line);
+                std::istringstream iss(this->next_command());
 
                 std::string command; iss >> command;
                 if (command == "position") {
@@ -56,7 +59,7 @@ namespace purebred {
         }
 
     private:
-        static void parse_position(std::istringstream &iss, auto &engine) {
+        inline void parse_position(std::istringstream &iss, auto &engine) {
             std::string token; iss >> token;
             std::string fen;
             if (token == "startpos") {
@@ -71,5 +74,21 @@ namespace purebred {
             engine.set_fen(fen);
         }
 
+        inline std::string next_command() {
+            std::string line;
+            if (this->mArgi >= this->mArgc) {
+                std::getline(std::cin, line);
+            }
+            else {
+                line = std::string{mArgv[mArgi]};
+                mArgi++;
+            }
+
+            return line;
+        }
+
+        i32 mArgc{};
+        char **mArgv{};
+        i32 mArgi = 1;
     };
 }
