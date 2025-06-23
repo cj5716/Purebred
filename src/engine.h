@@ -44,11 +44,9 @@ namespace purebred {
         }
 
         inline void loop() {
-            /*
             while (!mQuit) {
-                Communicator::parse_command(this->set_fen, this->get_root_pos, this->quit);
+                Communicator::parse_command(*this);
             }
-            */
         }
 
     private:

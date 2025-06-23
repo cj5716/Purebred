@@ -37,26 +37,26 @@ namespace purebred {
 
         static void report_best_move() {
         }
-/*
-        static void parse_command(auto set_fen, auto get_root_pos, auto quit) {
+
+        static void parse_command(auto &engine) {
             std::string line;
             std::getline(std::cin, line);
             std::istringstream iss(line);
 
             std::string command; iss >> command;
             if (command == "position") {
-                parse_position(iss, set_fen);
+                parse_position(iss, engine);
             }
             else if (command == "d") {
-                std::cout << get_root_pos().to_pretty_str() << '\n';
+                std::cout << engine.get_root_pos().to_pretty_str() << '\n';
             }
             else if (command == "quit") {
-                quit();
+                engine.quit();
             }
         }
 
     private:
-        static void parse_position(std::istringstream &iss, auto set_fen) {
+        static void parse_position(std::istringstream &iss, auto &engine) {
             std::string token; iss >> token;
             std::string fen;
             if (token == "startpos") {
@@ -68,8 +68,8 @@ namespace purebred {
             }
             else return;
 
-            set_fen(fen);
+            engine.set_fen(fen);
         }
-*/
+
     };
 }
