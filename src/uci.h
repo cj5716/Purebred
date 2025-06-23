@@ -28,9 +28,6 @@
 namespace purebred {
     class UCICommunicator {
     public:
-        static void report_init() {
-            std::cout << kName << " by " << kAuthor << std::endl;
-        }
 
         static void report_info_string() {
         }
@@ -38,20 +35,23 @@ namespace purebred {
         static void report_best_move() {
         }
 
-        static void parse_command(auto &engine) {
-            std::string line;
-            std::getline(std::cin, line);
-            std::istringstream iss(line);
+        static void run(auto &engine) {
+            std::cout << kName << " by " << kAuthor << std::endl;
+            while (true) {
+                std::string line;
+                std::getline(std::cin, line);
+                std::istringstream iss(line);
 
-            std::string command; iss >> command;
-            if (command == "position") {
-                parse_position(iss, engine);
-            }
-            else if (command == "d") {
-                std::cout << engine.get_root_pos().to_pretty_str() << '\n';
-            }
-            else if (command == "quit") {
-                engine.quit();
+                std::string command; iss >> command;
+                if (command == "position") {
+                    parse_position(iss, engine);
+                }
+                else if (command == "d") {
+                    std::cout << engine.get_root_pos().to_pretty_str() << '\n';
+                }
+                else if (command == "quit") {
+                   break;
+                }
             }
         }
 

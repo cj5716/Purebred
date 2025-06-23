@@ -31,5 +31,5 @@ i32 main(i32 argc, char* argv[]) {
     zobrist::init();
 
     Engine<UCICommunicator> engine;
-    engine.loop();
+    engine.run();
 }

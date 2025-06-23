@@ -27,9 +27,7 @@ namespace purebred {
     class Engine {
     public:
 
-        Engine() {
-            Communicator::report_init();
-        }
+        constexpr Engine() = default;
 
         inline void set_fen(std::string &fen) {
             mPos = Position::from_fen(fen);
@@ -39,18 +37,11 @@ namespace purebred {
             return mPos;
         }
 
-        inline void quit() {
-            mQuit = true;
-        }
-
-        inline void loop() {
-            while (!mQuit) {
-                Communicator::parse_command(*this);
-            }
+        inline void run() {
+            Communicator::run(*this);
         }
 
     private:
         Position mPos;
-        bool mQuit = false;
     };
 }

@@ -150,6 +150,10 @@ namespace purebred {
             res += '\n';
         }
 
+        res += "Fifty Move Rule: ";
+        res += this->fifty_mr_ply();
+        res += '\n';
+
         return res;
     }
 }
